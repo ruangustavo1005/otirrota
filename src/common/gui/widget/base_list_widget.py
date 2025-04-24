@@ -113,7 +113,7 @@ class BaseListWidget(BaseWidget[ModelType], Generic[ModelType]):
 
         header = self.table.horizontalHeader()
         self._configure_table_columns(header)
-        
+
         return layout
 
     def _configure_table_columns(self, header):

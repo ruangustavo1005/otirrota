@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Type, TypeVar, Generic
-
-from sqlalchemy.orm import Session
+from typing import Generic, Type, TypeVar
 
 from common.gui.widget.base_widget import BaseWidget
 from common.model.base_model import BaseModel

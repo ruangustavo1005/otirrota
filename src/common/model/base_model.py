@@ -1,10 +1,10 @@
-from datetime import datetime
-from typing import Dict, Any, TypeVar, Type, List, Optional, Union
 from abc import abstractmethod
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Type, TypeVar, Union
 
-from sqlalchemy import Column, Integer, DateTime, asc, desc
+from sqlalchemy import Column, DateTime, Integer, asc, desc
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import declarative_base, Session
+from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.sql.expression import ClauseElement
 
 from common.utils.number_utils import NumberUtils

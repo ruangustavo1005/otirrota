@@ -1,9 +1,9 @@
 import math
 from abc import abstractmethod
-from typing import Any, List, Generic, Optional
+from typing import Any, Generic, List, Optional
 
 from PySide6.QtCore import QItemSelection, QModelIndex
-from sqlalchemy import func, select, or_
+from sqlalchemy import func, select
 
 from common.controller.base_controller import BaseController, ModelType
 from common.gui.widget.base_list_widget import BaseListWidget

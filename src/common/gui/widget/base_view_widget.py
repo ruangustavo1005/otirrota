@@ -20,7 +20,5 @@ class BaseViewWidget(BaseCRUDWidget[ModelType], Generic[ModelType]):
             width=width,
             height=height,
             parent=parent,
-            flags=flags
+            flags=flags,
         )
-
-

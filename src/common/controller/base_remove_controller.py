@@ -40,7 +40,7 @@ class BaseRemoveController(BaseCRUDController[ModelType], Generic[ModelType]):
                             "Sucesso",
                             f"{model_description} removido(a) com sucesso!",
                         )
-                except Exception as e:
+                except Exception:
                     self._widget.show_error_pop_up(
                         "Erro",
                         f"Erro ao excluir o(a) {model_description}",

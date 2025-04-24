@@ -1,4 +1,4 @@
-from typing import Any, List, Union, Generic, TypeVar, Type
+from typing import Any, Generic, List, Type, TypeVar, Union
 
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, QPersistentModelIndex, Qt
 
