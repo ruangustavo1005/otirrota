@@ -111,7 +111,14 @@ class BaseListWidget(BaseWidget[ModelType], Generic[ModelType]):
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         layout.addWidget(self.table)
 
+        header = self.table.horizontalHeader()
+        self._configure_table_columns(header)
+        
         return layout
+
+    def _configure_table_columns(self, header):
+        header.setSectionResizeMode(header.ResizeMode.Stretch)
+        header.setStretchLastSection(True)
 
     def _create_pagination_area(self) -> QHBoxLayout:
         layout = QHBoxLayout()

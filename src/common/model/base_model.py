@@ -102,7 +102,7 @@ class BaseModel(Base):
             del values_dict["id"]
 
         for column in self.__table__.columns:
-            if column.name not in ["created_at", "updated_at"]:
+            if column.name not in ["id", "created_at", "updated_at"]:
                 result.append(values_dict[column.name])
 
         if "created_at" in values_dict:

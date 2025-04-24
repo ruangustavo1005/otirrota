@@ -128,6 +128,8 @@ class BaseListController(BaseController[ModelType], Generic[ModelType]):
         self._selected_model = None
         self._selected_row = -1
 
+        self.close_session_if_exists()
+
         self._update_row_count()
         self._update_page_count()
 
@@ -141,14 +143,22 @@ class BaseListController(BaseController[ModelType], Generic[ModelType]):
 
         filters = self._build_list_filters()
 
-        with Database.session_scope() as session:
+        self._session = Database.get_session()
+        try:
             query = select(self._model_class).filter(*filters)
 
             query = self._apply_sorting(query)
 
             query = query.limit(limit).offset(offset)
 
-            return list(session.execute(query).scalars().all())
+            results = list(self._session.execute(query).scalars().all())
+
+            self._session.commit()
+
+            return results
+        except Exception as e:
+            self._session.rollback()
+            raise e
 
     def _apply_sorting(self, query):
         return query
@@ -166,3 +176,12 @@ class BaseListController(BaseController[ModelType], Generic[ModelType]):
     def _update_page_count(self) -> None:
         self._page_count = max(math.ceil(self._row_count / self._rows_per_page), 1)
         self._widget.set_page_count(self._page_count)
+
+    def close(self) -> None:
+        self.close_session_if_exists()
+        super().close()
+
+    def close_session_if_exists(self):
+        if hasattr(self, "_session") and self._session:
+            self._session.close()
+            self._session = None
