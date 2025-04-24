@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "otirrota"
+version = "0.1.0"
+description = "Um otimizador de rotas/roteiros para a área da saúde"
+authors = ["Ruan Gustavo Moretti <ruan.gustavo.moretti10@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.12.*"
+sqlalchemy = "^2.0.40"
+alembic = "^1.15.2"
+psycopg2-binary = "^2.9.10"
+pyside6 = "^6.9.0"
+dotenv = "^0.9.9"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+flake8 = "^7.2.0"
+isort = "^6.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
