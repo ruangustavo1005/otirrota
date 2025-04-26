@@ -3,7 +3,7 @@ from abc import abstractmethod
 from typing import Any, Generic, List, Optional
 
 from PySide6.QtCore import QItemSelection, QModelIndex
-from sqlalchemy import func, select
+from sqlalchemy import Select, func, select
 
 from common.controller.base_controller import BaseController, ModelType
 from common.gui.widget.base_list_widget import BaseListWidget
@@ -160,8 +160,8 @@ class BaseListController(BaseController[ModelType], Generic[ModelType]):
             self._session.rollback()
             raise e
 
-    def _apply_sorting(self, query):
-        return query
+    def _apply_sorting(self, query: Select) -> Select:
+        return query.order_by(self._model_class.id.desc())
 
     def _build_list_filters(self) -> List:
         return []
