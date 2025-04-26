@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QFormLayout, QLabel, QLineEdit, QLayout
+from PySide6.QtWidgets import QFormLayout, QLabel, QLayout, QLineEdit
+
 from common.gui.widget.base_change_widget import BaseChangeWidget
 from routines.purpose.model import Purpose
 

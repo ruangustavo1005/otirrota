@@ -2,11 +2,11 @@ from abc import abstractmethod
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Any, Dict, Generator, List, Optional, Type, TypeVar, Union
-from sqlalchemy.orm.session import object_session
 
 from sqlalchemy import Column, DateTime, Integer, asc, desc
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Session, declarative_base
+from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import ClauseElement
 
 from common.utils.number_utils import NumberUtils
@@ -129,13 +129,13 @@ class BaseModel(Base):
         *filters,
         session: Optional[Session] = None,
         order_by: Optional[Union[str, ClauseElement]] = "id",
-        order_direction: str = "asc"
+        order_direction: str = "asc",
     ) -> List[Dict[str, Any]]:
         records = cls.query(
             *filters,
             session=session,
             order_by=order_by,
-            order_direction=order_direction
+            order_direction=order_direction,
         )
 
         return [
@@ -161,7 +161,7 @@ class BaseModel(Base):
         order_by: Optional[Union[str, ClauseElement]] = None,
         order_direction: str = "asc",
         limit: Optional[int] = None,
-        offset: Optional[int] = None
+        offset: Optional[int] = None,
     ) -> List[T]:
         def execute_query(s: Session) -> List[T]:
             query = s.query(cls)

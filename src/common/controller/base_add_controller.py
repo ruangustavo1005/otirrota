@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import Generic, Optional
 
-from common.controller.base_crud_controller import BaseCRUDController
 from common.controller.base_controller import ModelType
+from common.controller.base_crud_controller import BaseCRUDController
 from common.gui.widget.base_add_widget import BaseAddWidget
 
 

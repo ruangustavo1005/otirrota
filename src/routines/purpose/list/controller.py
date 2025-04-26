@@ -1,7 +1,5 @@
 from typing import Any, List, Type
 
-from PySide6.QtWidgets import QHBoxLayout
-
 from common.controller.base_controller import ModelType
 from common.controller.base_list_controller import BaseListController
 from routines.purpose.add.controller import PurposeAddController

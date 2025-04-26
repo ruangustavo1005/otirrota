@@ -1,4 +1,5 @@
 from typing import Any, Dict, Optional, Type
+
 from common.controller.base_change_controller import BaseChangeController
 from common.controller.base_controller import ModelType
 from common.gui.widget.base_change_widget import BaseChangeWidget

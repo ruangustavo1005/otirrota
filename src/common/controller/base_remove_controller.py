@@ -8,7 +8,9 @@ from common.gui.widget.base_widget import BaseWidget
 
 
 class BaseRemoveController(BaseCRUDController[ModelType], Generic[ModelType]):
-    def __init__(self, entity: ModelType, caller: BaseListController | None = None) -> None:
+    def __init__(
+        self, entity: ModelType, caller: BaseListController | None = None
+    ) -> None:
         self._entity = entity
         self._caller = caller
         self._model_class = self._get_model_class()

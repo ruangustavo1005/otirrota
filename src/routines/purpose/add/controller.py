@@ -1,4 +1,5 @@
 from typing import Optional, Type
+
 from common.controller.base_add_controller import BaseAddController
 from common.controller.base_controller import ModelType
 from common.gui.widget.base_add_widget import BaseAddWidget

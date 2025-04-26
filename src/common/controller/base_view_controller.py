@@ -4,13 +4,14 @@ from typing import Generic
 from common.controller.base_crud_controller import BaseCRUDController, ModelType
 from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_view_widget import BaseViewWidget
-from db import Database
 
 
 class BaseViewController(BaseCRUDController[ModelType], Generic[ModelType]):
     _widget: BaseViewWidget[ModelType]
-    
-    def __init__(self, entity: ModelType, caller: BaseListController | None = None) -> None:
+
+    def __init__(
+        self, entity: ModelType, caller: BaseListController | None = None
+    ) -> None:
         self._entity = entity
         super().__init__(caller)
         self._load_data()
