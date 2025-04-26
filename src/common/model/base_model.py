@@ -1,6 +1,8 @@
 from abc import abstractmethod
+from contextlib import contextmanager
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generator, List, Optional, Type, TypeVar, Union
+from sqlalchemy.orm.session import object_session
 
 from sqlalchemy import Column, DateTime, Integer, asc, desc
 from sqlalchemy.ext.declarative import declared_attr
@@ -20,14 +22,14 @@ class BaseModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, info={"title": "ID"})
     created_at = Column(
         DateTime,
-        default=datetime.utcnow,
+        default=datetime.now,
         nullable=False,
         info={"title": "Data de Criação"},
     )
     updated_at = Column(
         DateTime,
-        default=datetime.utcnow,
-        onupdate=datetime.utcnow,
+        default=datetime.now,
+        onupdate=datetime.now,
         nullable=False,
         info={"title": "Última Atualização"},
     )
@@ -197,16 +199,16 @@ class BaseModel(Base):
             session.add(self)
             return
 
-        with Database.session_scope() as session:
-            session.add(self)
+        with self.__existent_or_new_session() as session_:
+            session_.add(self)
 
     def delete(self, session: Optional[Session] = None) -> None:
         if session:
             session.delete(self)
             return
 
-        with Database.session_scope() as session:
-            session.delete(self)
+        with self.__existent_or_new_session() as session_:
+            session_.delete(self)
 
     def update(self, session: Optional[Session] = None, **kwargs) -> None:
         for key, value in kwargs.items():
@@ -216,8 +218,17 @@ class BaseModel(Base):
         if session:
             return
 
-        with Database.session_scope() as session:
-            session.add(self)
+        with self.__existent_or_new_session() as session_:
+            session_.add(self)
+
+    @contextmanager
+    def __existent_or_new_session(self) -> Generator[Session, None, None]:
+        if existing_session := object_session(self):
+            yield existing_session
+            existing_session.commit()
+        else:
+            with Database.session_scope() as session:
+                yield session
 
     @classmethod
     def create_all(cls):

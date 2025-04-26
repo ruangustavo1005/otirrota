@@ -56,10 +56,11 @@ class BaseListWidget(BaseWidget[ModelType], Generic[ModelType]):
         layout = QHBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
-        self._create_filter_fields(layout)
-
         self.update_button = QPushButton("Atualizar Consulta")
         self.update_button.setFixedWidth(120)
+
+        self._create_filter_fields(layout)
+
         layout.addWidget(self.update_button)
 
         return layout
