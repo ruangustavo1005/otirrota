@@ -5,29 +5,32 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from settings import Settings
-
 
 class Database:
     _instance: Optional["Database"] = None
     _engine: Optional[Engine] = None
     _session_factory = None
 
-    def __new__(cls):
+    @classmethod
+    def initialize(cls, db_user: str, db_password: str, db_host: str, db_port: str, db_name: str):
         if cls._instance is None:
             cls._instance = super(Database, cls).__new__(cls)
             cls._engine = create_engine(
                 "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
-                    Settings.DB_USER,
-                    Settings.DB_PASSWORD,
-                    Settings.DB_HOST,
-                    Settings.DB_PORT,
-                    Settings.DB_NAME,
+                    db_user,
+                    db_password,
+                    db_host,
+                    db_port,
+                    db_name,
                 ),
                 echo=True,
             )
             cls._session_factory = sessionmaker(bind=cls._engine)
-        return cls._instance
+
+    def __new__(cls):
+        if cls._instance is not None:
+            return cls._instance
+        return super(Database, cls).__new__(cls)
 
     @classmethod
     def get_engine(cls) -> Engine:

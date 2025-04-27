@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Any, Dict, Generic, Optional
 
-from common.controller.base_controller import ModelType
+from common.controller.base_entity_controller import ModelType
 from common.controller.base_crud_controller import BaseCRUDController
 from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_change_widget import BaseChangeWidget
@@ -36,12 +36,14 @@ class BaseChangeController(BaseCRUDController[ModelType], Generic[ModelType]):
                 self._caller.update_table_data()
                 self._widget.close()
         except Exception as e:
-            raise e
-            self._widget.show_error_pop_up(
-                "Erro",
-                f"Erro ao alterar o(a) {self._model_class.get_static_description()}",
-                "Por favor, entre em contato com o suporte",
-            )
+            self._handle_change_exception(e)
+
+    def _handle_change_exception(self, e: Exception) -> None:
+        self._widget.show_error_pop_up(
+            "Erro",
+            f"Erro ao alterar o(a) {self._model_class.get_static_description()}",
+            "Por favor, entre em contato com o suporte",
+        )
 
     @abstractmethod
     def _get_widget_instance(self) -> BaseChangeWidget[ModelType]:

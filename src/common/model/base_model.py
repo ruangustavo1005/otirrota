@@ -3,7 +3,7 @@ from contextlib import contextmanager
 from datetime import datetime
 from typing import Any, Dict, Generator, List, Optional, Type, TypeVar, Union
 
-from sqlalchemy import Column, DateTime, Integer, asc, desc
+from sqlalchemy import Column, DateTime, Integer, Select
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.orm.session import object_session
@@ -52,12 +52,20 @@ class BaseModel(Base):
         pass
 
     @classmethod
+    def _get_listable_columns(cls) -> List[Column]:
+        return [
+            column
+            for column in cls.__table__.columns
+            if not (hasattr(column, "info") and "list" in column.info and column.info["list"] is False)
+        ]
+
+    @classmethod
     def get_table_columns(cls) -> List[str]:
         id_column = None
         date_columns = []
         normal_columns = []
 
-        for column in cls.__table__.columns:
+        for column in cls._get_listable_columns():
             if hasattr(column, "info") and "title" in column.info:
                 title = column.info["title"]
             else:
@@ -81,7 +89,7 @@ class BaseModel(Base):
     def format_for_table(self) -> List[Any]:
         values_dict = {}
 
-        for column in self.__table__.columns:
+        for column in self._get_listable_columns():
             value = getattr(self, column.name)
 
             if isinstance(value, datetime):
@@ -103,7 +111,7 @@ class BaseModel(Base):
             result.append(values_dict["id"])
             del values_dict["id"]
 
-        for column in self.__table__.columns:
+        for column in self._get_listable_columns():
             if column.name not in ["id", "created_at", "updated_at"]:
                 result.append(values_dict[column.name])
 
@@ -124,19 +132,8 @@ class BaseModel(Base):
         )
 
     @classmethod
-    def list_for_combo_box(
-        cls: Type[T],
-        *filters,
-        session: Optional[Session] = None,
-        order_by: Optional[Union[str, ClauseElement]] = "id",
-        order_direction: str = "asc",
-    ) -> List[Dict[str, Any]]:
-        records = cls.query(
-            *filters,
-            session=session,
-            order_by=order_by,
-            order_direction=order_direction,
-        )
+    def list_for_combo_box(cls) -> List[Dict[str, Any]]:
+        records = cls.query().order_by(cls.id)
 
         return [
             {"id": record.id, "description": record.get_combo_box_description()}
@@ -154,45 +151,9 @@ class BaseModel(Base):
             return session.query(cls).filter(cls.id == id).first()
 
     @classmethod
-    def query(
-        cls: Type[T],
-        *filters,
-        session: Optional[Session] = None,
-        order_by: Optional[Union[str, ClauseElement]] = None,
-        order_direction: str = "asc",
-        limit: Optional[int] = None,
-        offset: Optional[int] = None,
-    ) -> List[T]:
-        def execute_query(s: Session) -> List[T]:
-            query = s.query(cls)
-
-            if filters:
-                query = query.filter(*filters)
-
-            if order_by:
-                if isinstance(order_by, str):
-                    if hasattr(cls, order_by):
-                        column_attr = getattr(cls, order_by)
-                        if order_direction.lower() == "desc":
-                            query = query.order_by(desc(column_attr))
-                        else:
-                            query = query.order_by(asc(column_attr))
-                else:
-                    query = query.order_by(order_by)
-
-            if limit is not None:
-                query = query.limit(limit)
-
-            if offset is not None:
-                query = query.offset(offset)
-
-            return query.all()
-
-        if session:
-            return execute_query(session)
-
+    def query(cls) -> Select:
         with Database.session_scope() as session:
-            return execute_query(session)
+            return session.query(cls)
 
     def save(self, session: Optional[Session] = None) -> None:
         if session:

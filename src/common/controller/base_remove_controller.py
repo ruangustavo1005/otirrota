@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QMessageBox
 
 from common.controller.base_crud_controller import BaseCRUDController, ModelType
 from common.controller.base_list_controller import BaseListController
-from common.gui.widget.base_widget import BaseWidget
+from common.gui.widget.base_entity_widget import BaseEntityWidget
 
 
 class BaseRemoveController(BaseCRUDController[ModelType], Generic[ModelType]):
@@ -23,7 +23,7 @@ class BaseRemoveController(BaseCRUDController[ModelType], Generic[ModelType]):
 
     def execute_action(self) -> None:
         model_description = self._model_class.get_static_description()
-        option = BaseWidget.show_question_pop_up(
+        option = BaseEntityWidget.show_question_pop_up(
             "Atenção",
             f"Tem certeza que deseja excluir o(a) {model_description}?",
             "Esta ação não pode ser revertida.",
@@ -33,14 +33,16 @@ class BaseRemoveController(BaseCRUDController[ModelType], Generic[ModelType]):
                 self._entity.delete()
                 if self._caller:
                     self._caller.update_table_data()
-                BaseWidget.show_info_pop_up(
+                BaseEntityWidget.show_info_pop_up(
                     "Sucesso",
                     f"{model_description} removido(a) com sucesso!",
                 )
             except Exception as e:
-                raise e
-                BaseWidget.show_error_pop_up(
-                    "Erro",
-                    f"Erro ao excluir o(a) {model_description}",
-                    "Por favor, entre em contato com o suporte",
-                )
+                self._handle_remove_exception(e)
+
+    def _handle_remove_exception(self, e: Exception) -> None:
+        BaseEntityWidget.show_error_pop_up(
+            "Erro",
+            f"Erro ao excluir o(a) {self._model_class.get_static_description()}",
+            "Por favor, entre em contato com o suporte",
+        )

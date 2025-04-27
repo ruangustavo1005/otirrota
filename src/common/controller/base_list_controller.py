@@ -5,12 +5,13 @@ from typing import Any, Generic, List, Optional
 from PySide6.QtCore import QItemSelection, QModelIndex
 from sqlalchemy import Select, func, select
 
-from common.controller.base_controller import BaseController, ModelType
+from common.controller.base_controller import BaseController
+from common.controller.base_entity_controller import BaseEntityController, ModelType
 from common.gui.widget.base_list_widget import BaseListWidget
 from db import Database
 
 
-class BaseListController(BaseController[ModelType], Generic[ModelType]):
+class BaseListController(BaseEntityController[ModelType], Generic[ModelType]):
     _widget: BaseListWidget[ModelType]
     _selected_data: List[Any] | None = None
     _selected_model: Optional[ModelType] = None

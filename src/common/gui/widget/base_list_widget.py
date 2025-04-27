@@ -13,10 +13,10 @@ from PySide6.QtWidgets import (
 )
 
 from common.gui.core.table_model_default import TableModelDefault
-from common.gui.widget.base_widget import BaseWidget, ModelType
+from common.gui.widget.base_entity_widget import BaseEntityWidget, ModelType
 
 
-class BaseListWidget(BaseWidget[ModelType], Generic[ModelType]):
+class BaseListWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
     def __init__(
         self,
         model_class: Type[ModelType],

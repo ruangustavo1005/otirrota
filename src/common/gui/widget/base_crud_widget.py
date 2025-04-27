@@ -4,10 +4,10 @@ from typing import Generic, Type
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QLayout, QPushButton, QVBoxLayout
 
-from common.gui.widget.base_widget import BaseWidget, ModelType
+from common.gui.widget.base_entity_widget import BaseEntityWidget, ModelType
 
 
-class BaseCRUDWidget(BaseWidget[ModelType], Generic[ModelType]):
+class BaseCRUDWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
     def __init__(
         self,
         model_class: Type[ModelType],
@@ -38,8 +38,11 @@ class BaseCRUDWidget(BaseWidget[ModelType], Generic[ModelType]):
         layout = QHBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignRight)
 
-        self.submit_button = QPushButton("Confirmar")
+        self.submit_button = QPushButton(self._get_submit_button_text())
         self.submit_button.setFixedWidth(100)
         layout.addWidget(self.submit_button)
 
         return layout
+
+    def _get_submit_button_text(self):
+        return "Confirmar"

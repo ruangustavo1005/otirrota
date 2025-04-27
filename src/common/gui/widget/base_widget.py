@@ -1,22 +1,15 @@
 from abc import abstractmethod
-from typing import Generic, Type, TypeVar
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QMessageBox, QWidget
 
-from common.model.base_model import BaseModel
 from settings import Settings
 
-ModelType = TypeVar("ModelType", bound=BaseModel)
 
-
-class BaseWidget(QWidget, Generic[ModelType]):
-    model_class: Type[ModelType]
-
+class BaseWidget(QWidget):
     def __init__(
         self,
-        model_class: Type[ModelType],
         title: str,
         width: int,
         height: int,
@@ -24,7 +17,6 @@ class BaseWidget(QWidget, Generic[ModelType]):
         flags=Qt.WindowFlags(),
     ):
         super(BaseWidget, self).__init__(parent, flags)
-        self.model_class = model_class
         self.setWindowTitle(title)
         self.setWindowIcon(QIcon(Settings.FAV_ICON_FILE_NAME))
         self.resize(width, height)

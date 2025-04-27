@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Generic, Optional
 
-from common.controller.base_controller import ModelType
+from common.controller.base_entity_controller import ModelType
 from common.controller.base_crud_controller import BaseCRUDController
 from common.gui.widget.base_add_widget import BaseAddWidget
 
@@ -27,9 +27,12 @@ class BaseAddController(BaseCRUDController[ModelType], Generic[ModelType]):
                 )
                 self._caller.update_table_data()
                 self._widget.close()
-        except Exception:
-            self._widget.show_error_pop_up(
-                "Erro",
-                f"Erro ao criar o(a) {self._model_class.get_static_description()}",
-                "Por favor, entre em contato com o suporte",
-            )
+        except Exception as e:
+            self._handle_add_exception(e)
+
+    def _handle_add_exception(self, e: Exception) -> None:
+        self._widget.show_error_pop_up(
+            "Erro",
+            f"Erro ao criar o(a) {self._model_class.get_static_description()}",
+            "Por favor, entre em contato com o suporte",
+        )
