@@ -161,6 +161,12 @@ class BaseListWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
         self.row_count_label = QLabel()
         layout.addWidget(self.row_count_label)
 
+        self.logged_user_label = QLabel("")
+        self.logged_user_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        layout.addWidget(self.logged_user_label)
+
         return layout
 
     def set_page_count(self, page_count: int) -> None:

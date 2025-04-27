@@ -9,6 +9,7 @@ from common.controller.base_controller import BaseController
 from common.controller.base_entity_controller import BaseEntityController, ModelType
 from common.gui.widget.base_list_widget import BaseListWidget
 from db import Database
+from settings import Settings
 
 
 class BaseListController(BaseEntityController[ModelType], Generic[ModelType]):
@@ -121,6 +122,9 @@ class BaseListController(BaseEntityController[ModelType], Generic[ModelType]):
 
     def show(self) -> None:
         self.update_table_data()
+        self._widget.logged_user_label.setText(
+            f"Logado como: {Settings.get_logged_user().name}"
+        )
         super().show()
 
     def update_table_data(self) -> None:

@@ -1,8 +1,9 @@
 from contextlib import contextmanager
-from typing import Generator, Optional
+from typing import Generator, Optional, Tuple
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, sessionmaker
 
 
@@ -12,7 +13,9 @@ class Database:
     _session_factory = None
 
     @classmethod
-    def initialize(cls, db_user: str, db_password: str, db_host: str, db_port: str, db_name: str):
+    def initialize(
+        cls, db_user: str, db_password: str, db_host: str, db_port: str, db_name: str
+    ):
         if cls._instance is None:
             cls._instance = super(Database, cls).__new__(cls)
             cls._engine = create_engine(
@@ -62,3 +65,17 @@ class Database:
         if cls._instance is None:
             cls()
         return cls._session_factory
+
+    @classmethod
+    def check_connection(cls) -> Tuple[bool, Optional[str]]:
+        if cls._engine is None:
+            return False, "O banco de dados não foi inicializado"
+
+        try:
+            with cls._engine.connect() as connection:
+                connection.execute(text("SELECT 1"))
+            return True, None
+        except OperationalError as e:
+            return False, str(e)
+        except Exception as e:
+            return False, f"Erro inesperado: {str(e)}"

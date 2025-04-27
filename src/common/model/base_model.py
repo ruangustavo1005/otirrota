@@ -56,7 +56,11 @@ class BaseModel(Base):
         return [
             column
             for column in cls.__table__.columns
-            if not (hasattr(column, "info") and "list" in column.info and column.info["list"] is False)
+            if not (
+                hasattr(column, "info")
+                and "list" in column.info
+                and column.info["list"] is False
+            )
         ]
 
     @classmethod

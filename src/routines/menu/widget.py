@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QCloseEvent, QIcon
-from PySide6.QtWidgets import QApplication, QMenuBar, QVBoxLayout
+from PySide6.QtGui import QAction, QIcon
+from PySide6.QtWidgets import QLabel, QMenuBar, QVBoxLayout
 
 from common.gui.widget.base_widget import BaseWidget
 from settings import Settings
@@ -12,11 +12,14 @@ class MenuWidget(BaseWidget):
 
     def _init_ui(self) -> None:
         self.base_layout = QVBoxLayout()
+        self.__create_menu()
+        self.__create_logged_user_label()
+        self.setLayout(self.base_layout)
 
+    def __create_menu(self):
         self.menu_bar = QMenuBar()
         self.__create_management_menu()
         self.base_layout.setMenuBar(self.menu_bar)
-        self.setLayout(self.base_layout)
 
     def __create_management_menu(self):
         self.routes_menu = self.menu_bar.addMenu("Gerenciamento")
@@ -32,3 +35,10 @@ class MenuWidget(BaseWidget):
                 self.user_menu_item,
             ]
         )
+
+    def __create_logged_user_label(self):
+        self.logged_user_label = QLabel("")
+        self.logged_user_label.setAlignment(
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
+        )
+        self.base_layout.addWidget(self.logged_user_label)
