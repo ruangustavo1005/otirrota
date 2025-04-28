@@ -5,8 +5,8 @@ from PySide6.QtWidgets import QApplication
 
 from common.gui.widget.base_widget import BaseWidget
 from db import Database
-from routines.menu.controller import MenuController
-from routines.user.login.controller import LoginController
+from domain.menu.controller import MenuController
+from domain.user.login.controller import LoginController
 from settings import Settings
 
 app = QApplication(sys.argv)

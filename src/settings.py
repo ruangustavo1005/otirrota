@@ -3,7 +3,7 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-from routines.user.model import User
+from domain.user.model import User
 
 load_dotenv()
 

@@ -10,9 +10,9 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from common.model.base_model import Base
-from routines.driver.model import Driver
-from routines.purpose.model import Purpose
-from routines.user.model import User
+from domain.driver.model import Driver
+from domain.purpose.model import Purpose
+from domain.user.model import User
 from settings import Settings
 
 config = context.config
