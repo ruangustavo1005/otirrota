@@ -61,7 +61,11 @@ class BaseListWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
 
         self._create_filter_fields(layout)
 
-        layout.addWidget(self.update_button)
+        button_layout = QHBoxLayout()   
+        button_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
+        button_layout.addWidget(self.update_button)
+
+        layout.addLayout(button_layout)
 
         return layout
 

@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.orm.session import object_session
 from sqlalchemy.sql.expression import ClauseElement
 
-from common.utils.number_utils import NumberUtils
+from common.utils.number import NumberUtils
 from db import Database
 
 Base = declarative_base()
