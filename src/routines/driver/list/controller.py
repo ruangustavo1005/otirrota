@@ -2,12 +2,10 @@ from typing import Any, List, Type
 
 from common.controller.base_entity_controller import ModelType
 from common.controller.base_list_controller import BaseListController
-
 from routines.driver.add.controller import DriverAddController
 from routines.driver.change.controller import DriverChangeController
 from routines.driver.list.widget import DriverListWidget
 from routines.driver.model import Driver
-
 from routines.driver.remove.controller import DriverRemoveController
 
 

@@ -7,8 +7,12 @@ from common.model.base_model import BaseModel
 
 class User(BaseModel):
     name = Column(String(), nullable=False, info={"title": "Nome"})
-    user_name = Column(String(), nullable=False, unique=True, info={"title": "Nome de usuário"})
-    password = Column(String(32), nullable=False, info={"title": "Senha", "list": False})
+    user_name = Column(
+        String(), nullable=False, unique=True, info={"title": "Nome de usuário"}
+    )
+    password = Column(
+        String(32), nullable=False, info={"title": "Senha", "list": False}
+    )
     active = Column(Boolean(), nullable=False, default=True, info={"title": "Ativo"})
 
     def __init__(

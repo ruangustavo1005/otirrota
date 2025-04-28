@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from typing import Any, Dict, Generic, Optional
 
-from common.controller.base_entity_controller import ModelType
 from common.controller.base_crud_controller import BaseCRUDController
+from common.controller.base_entity_controller import ModelType
 from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_change_widget import BaseChangeWidget
 

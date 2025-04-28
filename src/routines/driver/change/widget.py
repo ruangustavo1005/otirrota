@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QCheckBox, QFormLayout, QLabel, QLayout, QLineEdit
 
-from common.gui.widget.base_change_widget import BaseChangeWidget
 from common.gui.field.cpf_line_edit import CPFLineEdit
+from common.gui.widget.base_change_widget import BaseChangeWidget
 from routines.driver.model import Driver
 
 

@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QFormLayout, QLabel, QLayout, QLineEdit
 
-from common.gui.widget.base_add_widget import BaseAddWidget
 from common.gui.field.cpf_line_edit import CPFLineEdit
+from common.gui.widget.base_add_widget import BaseAddWidget
 from routines.driver.model import Driver
 
 

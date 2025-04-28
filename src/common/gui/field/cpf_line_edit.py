@@ -1,4 +1,4 @@
-from PySide6.QtCore import QRegularExpression, Qt
+from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QLineEdit
 
@@ -9,7 +9,7 @@ class CPFLineEdit(QLineEdit):
         self.setMaxLength(14)
         self.setPlaceholderText("000.000.000-00")
 
-        regex = QRegularExpression("[0-9\.\\-]*")
+        regex = QRegularExpression(r"[0-9\.\-]*")
         validator = QRegularExpressionValidator(regex)
         self.setValidator(validator)
 

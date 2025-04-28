@@ -22,7 +22,9 @@ class UserChangeWidget(BaseChangeWidget):
         self.user_name_field = QLineEdit()
         layout.addRow(QLabel("Login:"), self.user_name_field)
 
-        layout.addRow(QLabel("Atenção: Deixe a senha em branco para manter a senha atual."))
+        layout.addRow(
+            QLabel("Atenção: Deixe a senha em branco para manter a senha atual.")
+        )
 
         self.password_field = QLineEdit()
         self.password_field.setEchoMode(QLineEdit.EchoMode.Password)

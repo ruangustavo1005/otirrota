@@ -1,5 +1,5 @@
-from typing import Optional, Type
 import hashlib
+from typing import Optional, Type
 
 from sqlalchemy.exc import IntegrityError
 

@@ -29,7 +29,7 @@ class UserListController(BaseListController[User]):
         self._widget.add_button.clicked.connect(self.__add_button_clicked)
         self._widget.change_button.clicked.connect(self.__change_button_clicked)
         self._widget.remove_button.clicked.connect(self.__remove_button_clicked)
- 
+
     def __add_button_clicked(self) -> None:
         self.add_controller = UserAddController(self)
         self.add_controller.show()

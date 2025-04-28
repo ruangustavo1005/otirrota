@@ -1,8 +1,8 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QCheckBox
+from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QLineEdit
 
-from common.gui.widget.base_list_widget import BaseListWidget
 from common.gui.field.cpf_line_edit import CPFLineEdit
+from common.gui.widget.base_list_widget import BaseListWidget
 from routines.driver.model import Driver
 
 

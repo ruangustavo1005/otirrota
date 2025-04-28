@@ -18,8 +18,10 @@ class UserListWidget(BaseListWidget[User]):
         )
 
     def _create_filter_fields(self, filter_area_layout: QHBoxLayout) -> None:
-        name_label = QLabel("Nome:") 
-        name_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        name_label = QLabel("Nome:")
+        name_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
         name_label.setFixedWidth(40)
         filter_area_layout.addWidget(name_label)
 

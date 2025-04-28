@@ -1,13 +1,12 @@
 from abc import abstractmethod
 from contextlib import contextmanager
 from datetime import datetime
-from typing import Any, Dict, Generator, List, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Generator, List, Optional, Type, TypeVar
 
 from sqlalchemy import Column, DateTime, Integer, Select
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Session, declarative_base
 from sqlalchemy.orm.session import object_session
-from sqlalchemy.sql.expression import ClauseElement
 
 from common.utils.number import NumberUtils
 from db import Database

@@ -32,9 +32,11 @@ class UserChangeController(BaseChangeController[User]):
         password = self._widget.password_field.text()
         confirm_password = self._widget.confirm_password_field.text()
         if password and not confirm_password or confirm_password and not password:
-            self._widget.show_info_pop_up("Atenção", "Preencha a senha e a confirmação para alterar a senha")
+            self._widget.show_info_pop_up(
+                "Atenção", "Preencha a senha e a confirmação para alterar a senha"
+            )
             return None
-        
+
         if password and confirm_password:
             if password != confirm_password:
                 self._widget.show_info_pop_up("Atenção", "As senhas não conferem")
@@ -45,7 +47,7 @@ class UserChangeController(BaseChangeController[User]):
             "user_name": user_name.strip(),
             "active": self._widget.active_field.isChecked(),
         }
-        
+
         if password:
             updates["password"] = hashlib.md5(password.strip().encode()).hexdigest()
 

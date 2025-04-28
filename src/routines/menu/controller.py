@@ -5,6 +5,7 @@ from routines.purpose.list.controller import PurposeListController
 from routines.user.list.controller import UserListController
 from settings import Settings
 
+
 class MenuController(BaseController):
     _widget: MenuWidget
 
@@ -19,13 +20,10 @@ class MenuController(BaseController):
         self._widget.purpose_menu_item.triggered.connect(
             self.__purpose_menu_item_triggered
         )
-        self._widget.user_menu_item.triggered.connect(
-            self.__user_menu_item_triggered
-        )
+        self._widget.user_menu_item.triggered.connect(self.__user_menu_item_triggered)
         self._widget.driver_menu_item.triggered.connect(
             self.__driver_menu_item_triggered
         )
-
 
     def __purpose_menu_item_triggered(self) -> None:
         self.purpose_list_controller = PurposeListController()

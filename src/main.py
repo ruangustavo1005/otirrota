@@ -1,5 +1,5 @@
 import sys
-from sqlalchemy.exc import OperationalError
+
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import QApplication
 
@@ -8,7 +8,6 @@ from db import Database
 from routines.menu.controller import MenuController
 from routines.user.login.controller import LoginController
 from settings import Settings
-
 
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon(Settings.FAV_ICON_FILE_NAME))

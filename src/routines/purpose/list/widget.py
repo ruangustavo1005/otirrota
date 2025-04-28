@@ -19,7 +19,9 @@ class PurposeListWidget(BaseListWidget[Purpose]):
 
     def _create_filter_fields(self, filter_area_layout: QHBoxLayout) -> None:
         descricao_label = QLabel("Descrição:")
-        descricao_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+        descricao_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
         descricao_label.setFixedWidth(60)
         filter_area_layout.addWidget(descricao_label)
 

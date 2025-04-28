@@ -1,6 +1,7 @@
+from PySide6.QtWidgets import QFormLayout, QHBoxLayout, QLabel, QLayout, QLineEdit
+
 from common.gui.widget.base_crud_widget import BaseCRUDWidget
 from routines.user.model import User
-from PySide6.QtWidgets import QHBoxLayout, QLineEdit, QFormLayout, QLabel, QLayout
 
 
 class LoginWidget(BaseCRUDWidget[User]):

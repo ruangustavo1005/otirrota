@@ -1,5 +1,6 @@
 from typing import Any, List
-from sqlalchemy import Column, String, Boolean
+
+from sqlalchemy import Boolean, Column, String
 
 from common.model.base_model import BaseModel
 from common.utils.string import StringUtils

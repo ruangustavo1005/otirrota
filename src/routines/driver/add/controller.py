@@ -22,9 +22,7 @@ class DriverAddController(BaseAddController[Driver]):
             return None
 
         if not self._widget.cpf_field.is_valid_cpf():
-            self._widget.show_info_pop_up(
-                "Atenção", "O CPF informado não é válido"
-            )
+            self._widget.show_info_pop_up("Atenção", "O CPF informado não é válido")
             return None
 
         registration_number = self._widget.registration_number_field.text()
