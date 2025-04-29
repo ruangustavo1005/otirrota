@@ -22,10 +22,8 @@ class DriverListController(BaseListController[Driver]):
         filters = []
         if self._widget.name_filter.text():
             filters.append(Driver.name.ilike(f"%{self._widget.name_filter.text()}%"))
-        if self._widget.cpf_filter.text():
-            cpf_value = self._widget.cpf_filter.get_cpf_numbers()
-            if cpf_value:
-                filters.append(Driver.cpf.ilike(f"%{cpf_value}%"))
+        if self._widget.cpf_filter.get_cpf_numbers():
+            filters.append(Driver.cpf.ilike(f"%{self._widget.cpf_filter.get_cpf_numbers()}%"))
         if self._widget.registration_number_filter.text():
             filters.append(
                 Driver.registration_number.ilike(
