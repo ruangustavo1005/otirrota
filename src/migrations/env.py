@@ -11,6 +11,7 @@ from sqlalchemy import engine_from_config, pool
 
 from common.model.base_model import Base
 from domain.driver.model import Driver
+from domain.patient.model import Patient
 from domain.purpose.model import Purpose
 from domain.user.model import User
 from domain.vehicle.model import Vehicle
