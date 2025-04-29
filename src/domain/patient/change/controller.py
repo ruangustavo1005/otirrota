@@ -33,7 +33,7 @@ class PatientChangeController(BaseChangeController[Patient]):
         if phone and not self._widget.phone_field.is_valid_phone():
             self._widget.show_info_pop_up("Atenção", "O telefone é inválido")
             return None
-        
+
         return {
             "name": name.strip(),
             "cpf": cpf,

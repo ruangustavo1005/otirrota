@@ -23,7 +23,9 @@ class PatientListController(BaseListController[Patient]):
         if self._widget.nome_filter.text():
             filters.append(Patient.name.ilike(f"%{self._widget.nome_filter.text()}%"))
         if self._widget.cpf_filter.get_cpf_numbers():
-            filters.append(Patient.cpf.ilike(f"%{self._widget.cpf_filter.get_cpf_numbers()}%"))
+            filters.append(
+                Patient.cpf.ilike(f"%{self._widget.cpf_filter.get_cpf_numbers()}%")
+            )
         return filters
 
     def _set_widget_connections(self) -> None:
