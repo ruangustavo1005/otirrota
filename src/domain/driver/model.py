@@ -1,6 +1,12 @@
-from typing import Any, List
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, List, Optional
+
+if TYPE_CHECKING:
+    from domain.vehicle.model import Vehicle
 
 from sqlalchemy import Boolean, Column, String
+from sqlalchemy.orm import Mapped, relationship
 
 from common.model.base_model import BaseModel
 from common.utils.string import StringUtils
@@ -11,6 +17,15 @@ class Driver(BaseModel):
     cpf = Column(String(11), nullable=False, info={"title": "CPF"})
     registration_number = Column(String, nullable=False, info={"title": "Registro"})
     active = Column(Boolean, nullable=False, default=True, info={"title": "Ativo"})
+
+    default_from_vehicle: Mapped[Optional["Vehicle"]] = relationship(
+        "Vehicle",
+        foreign_keys="Vehicle.default_driver_id",
+        primaryjoin="and_(Driver.id==Vehicle.default_driver_id, Vehicle.active==True)",
+        uselist=False,
+        viewonly=True,
+        info={"title": "Veículo Padrão"},
+    )
 
     def __init__(
         self,
@@ -32,11 +47,23 @@ class Driver(BaseModel):
         result = super().format_for_table()
 
         result[2] = self.format_cpf()
+        result[5] = (
+            self.default_from_vehicle.get_description()
+            if self.default_from_vehicle
+            else ""
+        )
 
         return result
 
-    def get_combo_box_description(self) -> str:
-        return self.name
+    @classmethod
+    def _get_model_listable_columns(cls) -> List[Column]:
+        return super()._get_model_listable_columns() + [
+            Column(
+                name="default_from_vehicle",
+                type_=String,
+                info={"title": "Veículo Padrão"},
+            )
+        ]
 
     def get_description(self) -> str:
         return self.name

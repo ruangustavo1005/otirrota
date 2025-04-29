@@ -13,6 +13,7 @@ from common.model.base_model import Base
 from domain.driver.model import Driver
 from domain.purpose.model import Purpose
 from domain.user.model import User
+from domain.vehicle.model import Vehicle
 from settings import Settings
 
 config = context.config

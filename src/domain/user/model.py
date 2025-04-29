@@ -28,9 +28,6 @@ class User(BaseModel):
         self.password = password
         self.active = active
 
-    def get_combo_box_description(self) -> str:
-        return self.name
-
     def get_description(self) -> str:
         return self.name
 

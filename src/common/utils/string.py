@@ -6,3 +6,7 @@ class StringUtils:
     @classmethod
     def format_phone(cls, phone: str) -> str:
         return f"({phone[:2]}) {phone[2:7]}-{phone[7:]}"
+
+    @classmethod
+    def format_license_plate(cls, license_plate: str) -> str:
+        return f"{license_plate[:3]}-{license_plate[3:]}"

@@ -3,6 +3,7 @@ from domain.driver.list.controller import DriverListController
 from domain.menu.widget import MenuWidget
 from domain.purpose.list.controller import PurposeListController
 from domain.user.list.controller import UserListController
+from domain.vehicle.list.controller import VehicleListController
 from settings import Settings
 
 
@@ -24,6 +25,9 @@ class MenuController(BaseController):
         self._widget.driver_menu_item.triggered.connect(
             self.__driver_menu_item_triggered
         )
+        self._widget.vehicle_menu_item.triggered.connect(
+            self.__vehicle_menu_item_triggered
+        )
 
     def __purpose_menu_item_triggered(self) -> None:
         self.purpose_list_controller = PurposeListController()
@@ -36,6 +40,10 @@ class MenuController(BaseController):
     def __driver_menu_item_triggered(self) -> None:
         self.driver_list_controller = DriverListController()
         self.driver_list_controller.show()
+
+    def __vehicle_menu_item_triggered(self) -> None:
+        self.vehicle_list_controller = VehicleListController()
+        self.vehicle_list_controller.show()
 
     def show(self) -> None:
         self._widget.logged_user_label.setText(

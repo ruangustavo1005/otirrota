@@ -37,30 +37,42 @@ class BaseModel(Base):
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
 
-    @abstractmethod
     def get_combo_box_description(self) -> str:
-        pass
+        return self.get_description()
 
     @abstractmethod
     def get_description(self) -> str:
-        pass
+        raise NotImplementedError()
 
     @classmethod
     @abstractmethod
     def get_static_description(cls) -> str:
-        pass
+        raise NotImplementedError()
 
     @classmethod
-    def _get_listable_columns(cls) -> List[Column]:
+    def _get_all_listable_columns(cls) -> List[Column]:
+        return (
+            [cls.id]
+            + cls._get_model_listable_columns()
+            + [cls.created_at, cls.updated_at]
+        )
+
+    @classmethod
+    def _get_model_listable_columns(cls) -> List[Column]:
         return [
             column
             for column in cls.__table__.columns
-            if not (
-                hasattr(column, "info")
-                and "list" in column.info
-                and column.info["list"] is False
-            )
+            if column.name not in ["id", "created_at", "updated_at"]
+            and cls._isnt_column_listable(column)
         ]
+
+    @classmethod
+    def _isnt_column_listable(cls, column: Column) -> bool:
+        return not (
+            hasattr(column, "info")
+            and "list" in column.info
+            and column.info["list"] is False
+        )
 
     @classmethod
     def get_table_columns(cls) -> List[str]:
@@ -68,7 +80,7 @@ class BaseModel(Base):
         date_columns = []
         normal_columns = []
 
-        for column in cls._get_listable_columns():
+        for column in cls._get_all_listable_columns():
             if hasattr(column, "info") and "title" in column.info:
                 title = column.info["title"]
             else:
@@ -92,7 +104,7 @@ class BaseModel(Base):
     def format_for_table(self) -> List[Any]:
         values_dict = {}
 
-        for column in self._get_listable_columns():
+        for column in self._get_all_listable_columns():
             value = getattr(self, column.name)
 
             if isinstance(value, datetime):
@@ -114,7 +126,7 @@ class BaseModel(Base):
             result.append(values_dict["id"])
             del values_dict["id"]
 
-        for column in self._get_listable_columns():
+        for column in self._get_all_listable_columns():
             if column.name not in ["id", "created_at", "updated_at"]:
                 result.append(values_dict[column.name])
 
@@ -135,13 +147,8 @@ class BaseModel(Base):
         )
 
     @classmethod
-    def list_for_combo_box(cls) -> List[Dict[str, Any]]:
-        records = cls.query().order_by(cls.id)
-
-        return [
-            {"id": record.id, "description": record.get_combo_box_description()}
-            for record in records
-        ]
+    def list_for_combo_box(cls) -> List[T]:
+        return [record for record in cls.query().order_by(cls.id)]
 
     @classmethod
     def get_by_id(
@@ -201,3 +208,11 @@ class BaseModel(Base):
     @classmethod
     def drop_all(cls):
         Base.metadata.drop_all(Database.get_engine())
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, BaseModel):
+            return super().__eq__(other)
+        return self.id == other.id
+
+    def __hash__(self) -> int:
+        return hash(f"{self.__class__.__name__}-{self.id}")

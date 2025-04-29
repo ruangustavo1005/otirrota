@@ -10,9 +10,6 @@ class Purpose(BaseModel):
         super().__init__()
         self.description = description
 
-    def get_combo_box_description(self) -> str:
-        return self.description
-
     def get_description(self) -> str:
         return self.description
 

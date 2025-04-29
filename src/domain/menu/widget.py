@@ -32,11 +32,15 @@ class MenuWidget(BaseWidget):
         self.driver_menu_item = QAction(
             text="Motoristas", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
         )
+        self.vehicle_menu_item = QAction(
+            text="Veículos", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
+        )
         self.routes_menu.addActions(
             [
                 self.purpose_menu_item,
                 self.user_menu_item,
                 self.driver_menu_item,
+                self.vehicle_menu_item,
             ]
         )
 
