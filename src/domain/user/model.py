@@ -10,9 +10,7 @@ class User(BaseModel):
     user_name = Column(
         String(), nullable=False, unique=True, info={"title": "Nome de usuário"}
     )
-    password = Column(
-        String(32), nullable=False, info={"title": "Senha", "list": False}
-    )
+    password = Column(String(32), nullable=False, info={"list": False})
     active = Column(Boolean(), nullable=False, default=True, info={"title": "Ativo"})
 
     def __init__(
