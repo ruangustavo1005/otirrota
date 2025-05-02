@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QIcon
-from PySide6.QtWidgets import QLabel, QMenuBar, QVBoxLayout
+from PySide6.QtGui import QAction, QIcon, QCloseEvent
+from PySide6.QtWidgets import QLabel, QMenuBar, QVBoxLayout, QApplication
 
 from common.gui.widget.base_widget import BaseWidget
 from settings import Settings
@@ -38,6 +38,9 @@ class MenuWidget(BaseWidget):
         self.patient_menu_item = QAction(
             text="Pacientes", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
         )
+        self.location_menu_item = QAction(
+            text="Locais", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
+        )
         self.routes_menu.addActions(
             [
                 self.purpose_menu_item,
@@ -45,6 +48,7 @@ class MenuWidget(BaseWidget):
                 self.driver_menu_item,
                 self.vehicle_menu_item,
                 self.patient_menu_item,
+                self.location_menu_item,
             ]
         )
 
@@ -54,3 +58,6 @@ class MenuWidget(BaseWidget):
             Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight
         )
         self.base_layout.addWidget(self.logged_user_label)
+
+    def closeEvent(self, event: QCloseEvent) -> None:
+        QApplication.quit()
