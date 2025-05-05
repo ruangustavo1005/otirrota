@@ -12,8 +12,6 @@ class PurposeListWidget(BaseListWidget[Purpose]):
     ):
         super().__init__(
             model_class=Purpose,
-            width=1000,
-            height=738,
             parent=parent,
         )
 

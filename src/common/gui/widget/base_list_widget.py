@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QTableView,
     QVBoxLayout,
+    QGroupBox,
 )
 
 from common.gui.core.table_model_default import TableModelDefault
@@ -20,8 +21,8 @@ class BaseListWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
     def __init__(
         self,
         model_class: Type[ModelType],
-        width: int = 800,
-        height: int = 800,
+        width: int = 1000,
+        height: int = 660,
         parent=None,
         flags=Qt.WindowFlags(),
     ):
@@ -37,12 +38,16 @@ class BaseListWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
     def _init_ui(self) -> None:
         self.base_layout = QVBoxLayout()
 
+        self.filter_group = QGroupBox("Filtros")
         self.filter_area_layout = self._create_filter_area()
-        self.base_layout.addLayout(self.filter_area_layout)
+        self.filter_group.setLayout(self.filter_area_layout)
+        self.base_layout.addWidget(self.filter_group)
 
+        self.actions_group = QGroupBox("Ações")
         self.actions_area_layout = self._create_actions_area()
+        self.actions_group.setLayout(self.actions_area_layout)
         self.disable_row_actions()
-        self.base_layout.addLayout(self.actions_area_layout)
+        self.base_layout.addWidget(self.actions_group)
 
         self.table_area_layout = self._create_table_area()
         self.base_layout.addLayout(self.table_area_layout)

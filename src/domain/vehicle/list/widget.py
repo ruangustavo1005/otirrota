@@ -13,8 +13,6 @@ class VehicleListWidget(BaseListWidget[Vehicle]):
     ):
         super().__init__(
             model_class=Vehicle,
-            width=1000,
-            height=738,
             parent=parent,
         )
 

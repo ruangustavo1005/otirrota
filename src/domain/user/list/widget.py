@@ -12,8 +12,6 @@ class UserListWidget(BaseListWidget[User]):
     ):
         super().__init__(
             model_class=User,
-            width=1000,
-            height=738,
             parent=parent,
         )
 

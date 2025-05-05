@@ -12,8 +12,6 @@ class LocationListWidget(BaseListWidget[Location]):
     ):
         super().__init__(
             model_class=Location,
-            width=1000,
-            height=738,
             parent=parent,
         )
 

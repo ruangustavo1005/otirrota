@@ -20,7 +20,7 @@ class BaseListController(BaseEntityController[ModelType], Generic[ModelType]):
 
     def __init__(
         self,
-        rows_per_page: int = 20,
+        rows_per_page: int = 15,
         caller: BaseController | None = None,
     ) -> None:
         self._rows_per_page = rows_per_page

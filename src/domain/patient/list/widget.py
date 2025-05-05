@@ -13,8 +13,6 @@ class PatientListWidget(BaseListWidget[Patient]):
     ):
         super().__init__(
             model_class=Patient,
-            width=1000,
-            height=738,
             parent=parent,
         )
 

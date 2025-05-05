@@ -13,8 +13,6 @@ class DriverListWidget(BaseListWidget[Driver]):
     ):
         super().__init__(
             model_class=Driver,
-            width=1000,
-            height=738,
             parent=parent,
         )
 
