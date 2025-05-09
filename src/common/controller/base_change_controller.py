@@ -5,6 +5,7 @@ from common.controller.base_crud_controller import BaseCRUDController
 from common.controller.base_entity_controller import BaseEntityController, ModelType
 from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_change_widget import BaseChangeWidget
+from db import Database
 
 
 class BaseChangeController(BaseCRUDController[ModelType], Generic[ModelType]):
@@ -33,18 +34,21 @@ class BaseChangeController(BaseCRUDController[ModelType], Generic[ModelType]):
                 self._caller.callee_finalized()
 
     def _change(self) -> bool:
-        try:
-            if updates := self._get_model_updates():
-                self._entity.update(**updates)
-                self._widget.show_info_pop_up(
-                    "Sucesso",
-                    f"{self._model_class.get_static_description()} alterado(a) com sucesso",
-                )
-                self._widget.close()
-                return True
-        except Exception as e:
-            self._handle_change_exception(e)
-            return False
+        with Database.session_scope() as session:
+            try:
+                if updates := self._get_model_updates():
+                    entity = self._model_class.get_by_id(self._entity_id, session=session)
+                    entity.update(session=session, **updates)
+                    session.flush()
+                    self._widget.show_info_pop_up(
+                        "Sucesso",
+                        f"{self._model_class.get_static_description()} alterado(a) com sucesso",
+                    )
+                    self._widget.close()
+                    return True
+            except Exception as e:
+                self._handle_change_exception(e)
+                return False
 
     def _handle_change_exception(self, e: Exception) -> None:
         self._widget.show_error_pop_up(
