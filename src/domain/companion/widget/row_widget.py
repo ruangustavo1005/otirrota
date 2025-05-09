@@ -65,3 +65,9 @@ class CompanionRowWidget(QWidget):
         self.name_field.setText(companion.name)
         self.cpf_field.setText(companion.format_cpf())
         self.phone_field.setText(companion.format_phone())
+
+    def set_disabled(self, disabled: bool) -> None:
+        self.name_field.setDisabled(disabled)
+        self.cpf_field.setDisabled(disabled)
+        self.phone_field.setDisabled(disabled)
+        self.remove_button.setDisabled(disabled)

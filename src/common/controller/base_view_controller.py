@@ -14,11 +14,8 @@ class BaseViewController(BaseCRUDController[ModelType], Generic[ModelType]):
     ) -> None:
         self._entity = entity
         super().__init__(caller)
-        self._load_data()
+        self._populate_view(entity)
         self._widget.submit_button.hide()
-
-    def _load_data(self) -> None:
-        self._populate_view(self._entity)
 
     @abstractmethod
     def _populate_view(self, entity: ModelType) -> None:

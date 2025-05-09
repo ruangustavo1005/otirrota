@@ -18,6 +18,7 @@ class CompanionsGroupWidget(QWidget):
         super().__init__(parent)
         self.companion_rows: List[CompanionRowWidget] = []
         self.companions: List[Companion] = []
+        self._disabled = False
         self.setup_ui()
 
     def setup_ui(self) -> None:
@@ -59,6 +60,7 @@ class CompanionsGroupWidget(QWidget):
         new_row.remove_requested.connect(self.remove_companion_row)
         self.companions_layout.addWidget(new_row)
         self.companion_rows.append(new_row)
+        new_row.set_disabled(self._disabled)
 
     def remove_companion_row(self, row: CompanionRowWidget) -> None:
         if row in self.companion_rows:
@@ -92,3 +94,9 @@ class CompanionsGroupWidget(QWidget):
                 self.add_companion_row()
                 row = self.companion_rows[-1]
                 row.set_data(companion)
+
+    def set_disabled(self, disabled: bool) -> None:
+        self._disabled = disabled
+        for row in self.companion_rows:
+            row.set_disabled(disabled)
+        self.add_button.hide()

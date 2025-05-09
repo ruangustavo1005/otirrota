@@ -15,6 +15,7 @@ from domain.scheduling.list.widget import (
 )
 from domain.scheduling.model import Scheduling
 from domain.scheduling.remove.controller import SchedulingRemoveController
+from domain.scheduling.view.controller import SchedulingViewController
 
 
 class SchedulingListController(BaseListController[Scheduling]):
@@ -67,6 +68,7 @@ class SchedulingListController(BaseListController[Scheduling]):
         self._widget.add_button.clicked.connect(self.__add_button_clicked)
         self._widget.change_button.clicked.connect(self.__change_button_clicked)
         self._widget.remove_button.clicked.connect(self.__remove_button_clicked)
+        self._widget.view_button.clicked.connect(self.__view_button_clicked)
 
     def __add_button_clicked(self) -> None:
         self.add_controller = SchedulingAddController(self)
@@ -79,3 +81,7 @@ class SchedulingListController(BaseListController[Scheduling]):
     def __remove_button_clicked(self) -> None:
         self.remove_controller = SchedulingRemoveController(self._selected_model, self)
         self.remove_controller.show()
+
+    def __view_button_clicked(self) -> None:
+        self.view_controller = SchedulingViewController(self._selected_model, self)
+        self.view_controller.show()

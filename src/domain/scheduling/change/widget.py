@@ -61,7 +61,6 @@ class SchedulingChangeWidget(BaseChangeWidget):
         self.datetime_field = QDateTimeEdit()
         self.datetime_field.setCalendarPopup(True)
         self.datetime_field.setDisplayFormat("dd/MM/yyyy HH:mm")
-        self.datetime_field.setDateTime(QDateTime.currentDateTime())
         self.datetime_field.setFixedWidth(120)
         self.datetime_field.dateChanged.connect(self._focus_time_section)
 
@@ -69,7 +68,6 @@ class SchedulingChangeWidget(BaseChangeWidget):
         self.average_duration_field.setTimeRange(QTime(0, 0, 0), QTime(12, 0, 0))
         self.average_duration_field.setDisplayFormat("HH:mm")
         self.average_duration_field.setCurrentSection(TimeEdit.MinuteSection)
-        self.average_duration_field.setTime(QTime(1, 0))
         self.average_duration_field.setFixedWidth(50)
 
         time_layout = QHBoxLayout()
