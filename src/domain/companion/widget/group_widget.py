@@ -14,13 +14,13 @@ from domain.companion.widget.row_widget import CompanionRowWidget
 
 
 class CompanionsGroupWidget(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.companion_rows: List[CompanionRowWidget] = []
         self.companions: List[Companion] = []
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         main_layout = QVBoxLayout()
         main_layout.setContentsMargins(0, 0, 0, 0)
 
@@ -54,23 +54,20 @@ class CompanionsGroupWidget(QWidget):
 
         self.add_companion_row()
 
-    def add_companion_row(self):
-        new_row = CompanionRowWidget(is_removable=len(self.companion_rows) > 0)
+    def add_companion_row(self) -> None:
+        new_row = CompanionRowWidget()
         new_row.remove_requested.connect(self.remove_companion_row)
         self.companions_layout.addWidget(new_row)
         self.companion_rows.append(new_row)
 
-        if len(self.companion_rows) > 1 and self.companion_rows[0]:
-            self.companion_rows[0].set_removable(True)
-
-    def remove_companion_row(self, row):
+    def remove_companion_row(self, row: CompanionRowWidget) -> None:
         if row in self.companion_rows:
             self.companions_layout.removeWidget(row)
             self.companion_rows.remove(row)
             row.deleteLater()
 
-            if len(self.companion_rows) == 1 and self.companion_rows[0]:
-                self.companion_rows[0].set_removable(False)
+            if len(self.companion_rows) == 0:
+                self.add_companion_row()
 
     def get_companions(self) -> List[Companion]:
         companions = []
@@ -80,7 +77,7 @@ class CompanionsGroupWidget(QWidget):
                 companions.append(companion)
         return companions
 
-    def set_companions(self, companions: List[Companion]):
+    def set_companions(self, companions: List[Companion]) -> None:
         for row in self.companion_rows[:]:
             self.companions_layout.removeWidget(row)
             self.companion_rows.remove(row)

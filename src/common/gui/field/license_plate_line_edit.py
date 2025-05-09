@@ -2,6 +2,8 @@ from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QLineEdit
 
+from common.utils.string import StringUtils
+
 
 class LicensePlateLineEdit(QLineEdit):
     def __init__(self, parent=None) -> None:
@@ -72,14 +74,4 @@ class LicensePlateLineEdit(QLineEdit):
         return "".join(filter(str.isalnum, self.text()))
 
     def is_valid_license_plate(self) -> bool:
-        license_plate = self.get_license_plate_alphanumeric()
-        if len(license_plate) != 7:
-            return False
-
-        # Check format: 3 letters + 1 number + 1 alphanumeric + 2 numbers
-        return (
-            all(c.isalpha() for c in license_plate[:3])
-            and license_plate[3].isdigit()
-            and license_plate[4].isalnum()
-            and all(c.isdigit() for c in license_plate[5:7])
-        )
+        return StringUtils.is_valid_license_plate(self.get_license_plate_alphanumeric())

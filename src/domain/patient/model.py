@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from sqlalchemy import Column, Select, String, and_
 
@@ -17,7 +17,7 @@ class Patient(BaseModel):
         self.cpf = cpf
         self.phone = phone
 
-    def format_cpf(self) -> str:
+    def format_cpf(self) -> Optional[str]:
         return StringUtils.format_cpf(self.cpf)
 
     def format_phone(self) -> str:
@@ -26,8 +26,8 @@ class Patient(BaseModel):
     def format_for_table(self) -> List[Any]:
         result = super().format_for_table()
 
-        result[2] = self.format_cpf()
-        result[3] = self.format_phone()
+        result[1] = self.format_cpf()
+        result[2] = self.format_phone()
 
         return result
 

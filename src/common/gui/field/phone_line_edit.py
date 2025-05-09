@@ -2,6 +2,8 @@ from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QLineEdit
 
+from common.utils.string import StringUtils
+
 
 class PhoneLineEdit(QLineEdit):
     def __init__(self, parent=None) -> None:
@@ -49,4 +51,4 @@ class PhoneLineEdit(QLineEdit):
         return "".join(filter(str.isdigit, self.text()))
 
     def is_valid_phone(self) -> bool:
-        return len(self.get_phone_number()) == 11
+        return StringUtils.is_valid_phone(self.get_phone_number())

@@ -40,14 +40,14 @@ class Driver(BaseModel):
         self.registration_number = registration_number
         self.active = active
 
-    def format_cpf(self) -> str:
+    def format_cpf(self) -> Optional[str]:
         return StringUtils.format_cpf(self.cpf)
 
     def format_for_table(self) -> List[Any]:
         result = super().format_for_table()
 
-        result[2] = self.format_cpf()
-        result[5] = (
+        result[1] = self.format_cpf()
+        result[4] = (
             self.default_from_vehicle.get_description()
             if self.default_from_vehicle
             else ""

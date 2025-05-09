@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, relationship
@@ -40,10 +40,10 @@ class Companion(BaseModel):
         self.cpf = cpf
         self.phone = phone
 
-    def format_cpf(self) -> str:
+    def format_cpf(self) -> Optional[str]:
         return StringUtils.format_cpf(self.cpf)
 
-    def format_phone(self) -> str:
+    def format_phone(self) -> Optional[str]:
         return StringUtils.format_phone(self.phone)
 
     def get_description(self) -> str:

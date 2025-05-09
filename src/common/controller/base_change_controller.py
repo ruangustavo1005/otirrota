@@ -13,9 +13,9 @@ class BaseChangeController(BaseCRUDController[ModelType], Generic[ModelType]):
     def __init__(
         self, entity: ModelType, caller: BaseListController | None = None
     ) -> None:
-        self._entity = entity
+        self._entity_id = entity.id
         super().__init__(caller)
-        self._populate_form(self._entity)
+        self._populate_form(entity)
 
     @abstractmethod
     def _populate_form(self, entity: ModelType) -> None:

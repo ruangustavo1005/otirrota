@@ -1,57 +1,108 @@
 from typing import Any, Dict, Optional, Type
 
+from sqlalchemy.orm import Session
+
 from common.controller.base_change_controller import BaseChangeController
 from common.controller.base_entity_controller import ModelType
 from common.gui.widget.base_change_widget import BaseChangeWidget
-from domain.vehicle.change.widget import VehicleChangeWidget
-from domain.vehicle.model import Vehicle
+from db import Database
+from domain.companion.model import Companion
+from domain.scheduling.change.widget import SchedulingChangeWidget
+from domain.scheduling.model import Scheduling
+from PySide6.QtCore import QDateTime, QDate, QTime
 
 
-class VehicleChangeController(BaseChangeController[Vehicle]):
-    _widget: VehicleChangeWidget
+class SchedulingChangeController(BaseChangeController[Scheduling]):
+    _widget: SchedulingChangeWidget
 
-    def _populate_form(self, entity: Vehicle) -> None:
-        self._widget.license_plate_field.setText(entity.format_license_plate())
-        self._widget.description_field.setText(entity.description)
-        self._widget.capacity_field.setText(str(entity.capacity))
-        self._widget.default_driver_combo_box.setCurrentIndexByData(
-            entity.default_driver
+    def _populate_form(self, entity: Scheduling) -> None:
+        self._widget.datetime_field.setDateTime(
+            QDateTime(
+                QDate(entity.datetime.year, entity.datetime.month, entity.datetime.day),
+                QTime(entity.datetime.hour, entity.datetime.minute, entity.datetime.second),
+            )
         )
-        self._widget.active_field.setChecked(entity.active)
+        self._widget.average_duration_field.setTime(
+            QTime(
+                entity.average_duration.hour,
+                entity.average_duration.minute,
+                entity.average_duration.second,
+            )
+        )
+        self._widget.patient_field.set_selected_model(entity.patient)
+        self._widget.location_field.set_selected_model(entity.location)
+        self._widget.purpose_field.setCurrentIndexByData(entity.purpose)
+        self._widget.sensitive_patient_checkbox.setChecked(entity.sensitive_patient)
+        self._widget.description_field.setText(entity.description)
+        self._widget.companions_widget.set_companions(entity.companions)
 
     def _get_model_updates(self) -> Optional[Dict[str, Any]]:
-        license_plate = (
-            self._widget.license_plate_field.get_license_plate_alphanumeric()
-        )
-        if (
-            not license_plate
-            or not self._widget.license_plate_field.is_valid_license_plate()
-        ):
-            self._widget.show_info_pop_up("Atenção", "A placa informada não é válida")
+        location = self._widget.location_field.get_selected_model()
+        if not location:
+            self._widget.show_info_pop_up("Atenção", "Selecione uma localização")
             return None
 
-        description = self._widget.description_field.text()
-        if not description:
-            self._widget.show_info_pop_up("Atenção", "A descrição é obrigatória")
+        patient = self._widget.patient_field.get_selected_model()
+        if not patient:
+            self._widget.show_info_pop_up("Atenção", "Selecione um paciente")
             return None
 
-        capacity = self._widget.capacity_field.text()
-        if not capacity:
-            self._widget.show_info_pop_up("Atenção", "A capacidade é obrigatória")
+        purpose = self._widget.purpose_field.get_current_data()
+        if not purpose:
+            self._widget.show_info_pop_up("Atenção", "Selecione uma finalidade")
             return None
-
-        default_driver = self._widget.default_driver_combo_box.get_current_data()
 
         return {
-            "license_plate": license_plate.strip(),
-            "description": description.strip(),
-            "capacity": int(capacity.strip()),
-            "default_driver_id": default_driver.id if default_driver else None,
-            "active": self._widget.active_field.isChecked(),
+            "datetime": self._widget.datetime_field.dateTime().toPython().replace(second=0, microsecond=0),
+            "average_duration": self._widget.average_duration_field.time().toPython(),
+            "sensitive_patient": self._widget.sensitive_patient_checkbox.isChecked(),
+            "description": self._widget.description_field.toPlainText().strip(),
+            "location_id": location.id,
+            "purpose_id": purpose.id,
+            "patient_id": patient.id,
         }
 
+    def _change(self) -> bool:
+        with Database.session_scope() as session:
+            try:
+                if updates := self._get_model_updates():
+                    scheduling = Scheduling.get_by_id(self._entity_id, session=session)
+                    scheduling.update(session=session, **updates)
+                    self._update_companions(session)
+                    session.commit()
+                    self._widget.show_info_pop_up(
+                        "Sucesso",
+                        f"{self._model_class.get_static_description()} alterado(a) com sucesso",
+                    )
+                    self._widget.close()
+                    return True
+            except Exception as e:
+                self._handle_change_exception(e)
+                session.rollback()
+                return False
+
+    def _update_companions(self, session: Session) -> None:
+        companion_ids = []
+        for companion in self._widget.companions_widget.get_companions():
+            if companion.id is None:
+                companion.scheduling_id = self._entity_id
+                companion.save(session)
+                session.flush()
+            else:
+                Companion.get_by_id(companion.id, session=session).update(
+                    session=session,
+                    name=companion.name,
+                    cpf=companion.cpf,
+                    phone=companion.phone,
+                )
+            companion_ids.append(companion.id)
+        session.query(Companion).filter(
+            Companion.scheduling_id == self._entity_id,
+            Companion.id.notin_(companion_ids),
+        ).delete()
+
     def _get_widget_instance(self) -> BaseChangeWidget:
-        return VehicleChangeWidget()
+        return SchedulingChangeWidget()
 
     def _get_model_class(self) -> Type[ModelType]:
-        return Vehicle
+        return Scheduling

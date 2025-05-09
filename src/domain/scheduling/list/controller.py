@@ -8,6 +8,7 @@ from common.controller.base_controller import BaseController
 from common.controller.base_entity_controller import ModelType
 from common.controller.base_list_controller import BaseListController
 from domain.scheduling.add.controller import SchedulingAddController
+from domain.scheduling.change.controller import SchedulingChangeController
 from domain.scheduling.list.widget import (
     SchedulingDateTypeFilterEnum,
     SchedulingListWidget,
@@ -64,16 +65,16 @@ class SchedulingListController(BaseListController[Scheduling]):
     def _set_widget_connections(self) -> None:
         super()._set_widget_connections()
         self._widget.add_button.clicked.connect(self.__add_button_clicked)
-        # self._widget.change_button.clicked.connect(self.__change_button_clicked)
+        self._widget.change_button.clicked.connect(self.__change_button_clicked)
         self._widget.remove_button.clicked.connect(self.__remove_button_clicked)
 
     def __add_button_clicked(self) -> None:
         self.add_controller = SchedulingAddController(self)
         self.add_controller.show()
 
-    # def __change_button_clicked(self) -> None:
-    #     self.change_controller = SchedulingChangeController(self._selected_model, self)
-    #     self.change_controller.show()
+    def __change_button_clicked(self) -> None:
+        self.change_controller = SchedulingChangeController(self._selected_model, self)
+        self.change_controller.show()
 
     def __remove_button_clicked(self) -> None:
         self.remove_controller = SchedulingRemoveController(self._selected_model, self)

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime  # noqa: F401
+from datetime import datetime, time  # noqa: F401
 from typing import TYPE_CHECKING, Any, List, Optional
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Time
@@ -53,7 +53,7 @@ class Scheduling(BaseModel):
     def __init__(
         self,
         datetime: "datetime" = None,
-        average_duration: Time = None,
+        average_duration: time = None,
         sensitive_patient: bool = False,
         description: str = None,
         location_id: int = None,
@@ -72,12 +72,12 @@ class Scheduling(BaseModel):
     def format_for_table(self) -> List[Any]:
         result = super().format_for_table()
 
-        result[4] = self.location.get_description()
-        result[5] = self.purpose.get_description()
-        result[6] = self.patient.get_description()
+        result[3] = self.location.get_description()
+        result[4] = self.purpose.get_description()
+        result[5] = self.patient.get_description()
 
         if self.companions:
-            result[6] += f" (+{len(self.companions)})"
+            result[5] += f" (+{len(self.companions)})"
 
         return result
 

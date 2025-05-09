@@ -11,13 +11,17 @@ from domain.companion.model import Companion
 class CompanionRowWidget(QWidget):
     remove_requested = Signal(object)
 
-    def __init__(self, parent=None, is_removable=True):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
-        self.setup_ui(is_removable)
+        self.setup_ui()
 
-    def setup_ui(self, is_removable):
+    def setup_ui(self) -> None:
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
+
+        self.id_field = QLineEdit()
+        self.id_field.hide()
+        layout.addWidget(self.id_field, 0)
 
         self.name_field = QLineEdit()
         layout.addWidget(self.name_field, 5)
@@ -29,7 +33,6 @@ class CompanionRowWidget(QWidget):
         layout.addWidget(self.phone_field, 3)
 
         self.remove_button = QPushButton("Remover Linha")
-        self.remove_button.setEnabled(is_removable)
         self.remove_button.clicked.connect(lambda: self.remove_requested.emit(self))
         layout.addWidget(self.remove_button, 2)
 
@@ -52,12 +55,13 @@ class CompanionRowWidget(QWidget):
                 raise ValueError(f"O nome do acompanhante {index + 1} é obrigatório")
             return None
 
-        return Companion(name=name, cpf=cpf, phone=phone)
+        companion = Companion(name=name, cpf=cpf, phone=phone)
+        if self.id_field.text():
+            companion.id = int(self.id_field.text())
+        return companion
 
-    def set_data(self, companion: Companion):
+    def set_data(self, companion: Companion) -> None:
+        self.id_field.setText(str(companion.id))
         self.name_field.setText(companion.name)
         self.cpf_field.setText(companion.format_cpf())
         self.phone_field.setText(companion.format_phone())
-
-    def set_removable(self, is_removable):
-        self.remove_button.setEnabled(is_removable)

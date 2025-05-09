@@ -191,6 +191,7 @@ class BaseModel(Base):
                 setattr(self, key, value)
 
         if session:
+            session.add(self)
             session.flush()
             return
 
