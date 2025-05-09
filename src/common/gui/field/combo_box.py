@@ -1,4 +1,4 @@
-from typing import Any, Generic, Type, TypeVar, Union
+from typing import Any, Generic, List, Type, TypeVar, Union
 
 from PySide6.QtWidgets import QComboBox
 
@@ -24,8 +24,11 @@ class ComboBox(QComboBox, Generic[ModelType]):
         self.clear()
         if default_none:
             self.addItem("", None)
-        for item in self.model_class.list_for_combo_box():
+        for item in self._list_for_fill():
             self.addItem(item.get_combo_box_description(), item)
+
+    def _list_for_fill(self) -> List[ModelType]:
+        return self.model_class.list_for_combo_box()
 
     def setCurrentIndexByData(self, data_value: Any) -> None:
         index = next(i for i in range(self.count()) if self.itemData(i) == data_value)

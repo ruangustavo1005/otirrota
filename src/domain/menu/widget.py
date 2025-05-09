@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QIcon, QCloseEvent
-from PySide6.QtWidgets import QLabel, QMenuBar, QVBoxLayout, QApplication
+from PySide6.QtGui import QAction, QCloseEvent, QIcon
+from PySide6.QtWidgets import QApplication, QLabel, QMenuBar, QVBoxLayout
 
 from common.gui.widget.base_widget import BaseWidget
 from settings import Settings
@@ -41,6 +41,9 @@ class MenuWidget(BaseWidget):
         self.location_menu_item = QAction(
             text="Locais", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
         )
+        self.scheduling_menu_item = QAction(
+            text="Agendamentos", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
+        )
         self.routes_menu.addActions(
             [
                 self.purpose_menu_item,
@@ -49,6 +52,7 @@ class MenuWidget(BaseWidget):
                 self.vehicle_menu_item,
                 self.patient_menu_item,
                 self.location_menu_item,
+                self.scheduling_menu_item,
             ]
         )
 

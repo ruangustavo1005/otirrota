@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from sqlalchemy import Column, String
+from sqlalchemy import Column, Select, String, and_
 
 from common.model.base_model import BaseModel
 from common.utils.string import StringUtils
@@ -32,8 +32,22 @@ class Patient(BaseModel):
         return result
 
     def get_description(self) -> str:
-        return self.name
+        return f"{self.name} - {self.format_cpf()}"
 
     @classmethod
     def get_static_description(cls) -> str:
         return "Paciente"
+
+    @classmethod
+    def apply_text_search_filter(cls, query: Select, search_text: str) -> Select:
+        text_parts = search_text.split(" ")
+        search_conditions = []
+        for text_part in text_parts:
+            text_part = text_part.strip()
+            if not text_part:
+                continue
+            if text_part.isdigit():
+                search_conditions.append(cls.cpf.ilike(f"%{text_part}%"))
+            else:
+                search_conditions.append(cls.name.ilike(f"%{text_part}%"))
+        return query.filter(and_(*search_conditions))

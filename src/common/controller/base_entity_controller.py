@@ -24,3 +24,6 @@ class BaseEntityController(BaseController, Generic[ModelType]):
 
     def _get_widget_instance(self) -> BaseEntityWidget[ModelType]:
         raise NotImplementedError()
+
+    def callee_finalized(self) -> None:
+        pass

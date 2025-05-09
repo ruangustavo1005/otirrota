@@ -1,12 +1,11 @@
 from typing import Any, List, Type
 
-from PySide6.QtGui import QDesktopServices
 from PySide6.QtCore import QUrl
+from PySide6.QtGui import QDesktopServices
 
 from common.controller.base_entity_controller import ModelType
 from common.controller.base_list_controller import BaseListController
 from domain.location.add.controller import LocationAddController
-
 from domain.location.change.controller import LocationChangeController
 from domain.location.list.widget import LocationListWidget
 from domain.location.model import Location
@@ -50,5 +49,5 @@ class LocationListController(BaseListController[Location]):
         self.remove_controller.show()
 
     def __open_maps_button_clicked(self) -> None:
-        url = f"https://www.google.com/maps/@{self._selected_model.coordinates.latitude},{self._selected_model.coordinates.longitude},15z"
+        url = f"https://www.google.com/maps/@{self._selected_model.coordinates.latitude},{self._selected_model.coordinates.longitude},15z"  # noqa: E501
         QDesktopServices.openUrl(QUrl(url))

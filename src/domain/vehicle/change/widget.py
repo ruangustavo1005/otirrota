@@ -1,10 +1,9 @@
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import QCheckBox, QFormLayout, QLabel, QLayout, QLineEdit
 
-from common.gui.field.combo_box import ComboBox
 from common.gui.field.license_plate_line_edit import LicensePlateLineEdit
 from common.gui.widget.base_change_widget import BaseChangeWidget
-from domain.driver.model import Driver
+from domain.driver.field.without_vehicle_combo_box import DriversWithoutVehicleComboBox
 from domain.vehicle.model import Vehicle
 
 
@@ -30,7 +29,7 @@ class VehicleChangeWidget(BaseChangeWidget):
         self.capacity_field.setValidator(QIntValidator())
         layout.addRow(QLabel("Capacidade:"), self.capacity_field)
 
-        self.default_driver_combo_box = ComboBox(model_class=Driver)
+        self.default_driver_combo_box = DriversWithoutVehicleComboBox()
         layout.addRow(QLabel("Motorista Padrão:"), self.default_driver_combo_box)
 
         self.active_field = QCheckBox()

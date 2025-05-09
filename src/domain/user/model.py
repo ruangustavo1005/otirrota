@@ -11,7 +11,7 @@ class User(BaseModel):
         String(), nullable=False, unique=True, info={"title": "Nome de usuário"}
     )
     password = Column(String(32), nullable=False, info={"list": False})
-    active = Column(Boolean(), nullable=False, default=True, info={"title": "Ativo"})
+    active = Column(Boolean(), nullable=False, default=True, info={"title": "Ativo?"})
 
     def __init__(
         self,
@@ -27,7 +27,10 @@ class User(BaseModel):
         self.active = active
 
     def get_description(self) -> str:
-        return self.name
+        prefix = ""
+        if not self.active:
+            prefix = "(Inativo) "
+        return f"{prefix}{self.name}"
 
     @classmethod
     def get_static_description(cls) -> str:

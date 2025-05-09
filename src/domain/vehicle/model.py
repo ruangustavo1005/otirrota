@@ -22,7 +22,7 @@ class Vehicle(BaseModel):
         nullable=True,
         info={"title": "Motorista Padrão"},
     )
-    active = Column(Boolean, nullable=False, default=True, info={"title": "Ativo"})
+    active = Column(Boolean, nullable=False, default=True, info={"title": "Ativo?"})
 
     default_driver: Mapped[Optional["Driver"]] = relationship(
         "Driver", foreign_keys=[default_driver_id]
@@ -52,15 +52,18 @@ class Vehicle(BaseModel):
         result[1] = self.format_license_plate()
 
         if self.default_driver:
-            result[4] = self.default_driver.name
+            result[4] = self.default_driver.get_description()
 
         return result
 
     def get_combo_box_description(self) -> str:
-        return f"{self.format_license_plate()} - {self.description}{f' ({self.default_driver.name})' if self.default_driver else ''}"
+        return f"{self.get_description()}{f' ({self.default_driver.name})' if self.default_driver else ''}"
 
     def get_description(self) -> str:
-        return f"{self.format_license_plate()} - {self.description}"
+        prefix = ""
+        if not self.active:
+            prefix = "(Inativo) "
+        return f"{prefix}{self.format_license_plate()} - {self.description}"
 
     @classmethod
     def get_static_description(cls) -> str:

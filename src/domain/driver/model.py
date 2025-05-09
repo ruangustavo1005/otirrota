@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, List, Optional
 if TYPE_CHECKING:
     from domain.vehicle.model import Vehicle
 
-from sqlalchemy import Boolean, Column, String
+from sqlalchemy import Boolean, Column, Select, String
 from sqlalchemy.orm import Mapped, relationship
 
 from common.model.base_model import BaseModel
@@ -16,7 +16,7 @@ class Driver(BaseModel):
     name = Column(String(), nullable=False, info={"title": "Nome"})
     cpf = Column(String(11), nullable=False, info={"title": "CPF"})
     registration_number = Column(String, nullable=False, info={"title": "Registro"})
-    active = Column(Boolean, nullable=False, default=True, info={"title": "Ativo"})
+    active = Column(Boolean, nullable=False, default=True, info={"title": "Ativo?"})
 
     default_from_vehicle: Mapped[Optional["Vehicle"]] = relationship(
         "Vehicle",
@@ -66,8 +66,18 @@ class Driver(BaseModel):
         ]
 
     def get_description(self) -> str:
-        return self.name
+        prefix = ""
+        if not self.active:
+            prefix = "(Inativo) "
+        return f"{prefix}{self.name}"
 
     @classmethod
     def get_static_description(cls) -> str:
         return "Motorista"
+
+    @classmethod
+    def apply_text_search_filter(cls, query: Select, search_text: str) -> Select:
+        text_parts = search_text.split(" ")
+        for text_part in text_parts:
+            query = query.filter(cls.name.ilike(f"%{text_part}%"))
+        return query

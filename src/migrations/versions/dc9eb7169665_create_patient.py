@@ -1,5 +1,5 @@
 """
-Revision: dc9eb7169665 - create vehicle (2025-04-28 22:40:31.709089)
+Revision: dc9eb7169665 - create patient (2025-04-28 22:40:31.709089)
 """
 
 from typing import Sequence, Union

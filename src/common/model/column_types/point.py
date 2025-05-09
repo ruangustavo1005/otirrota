@@ -1,6 +1,7 @@
-import sqlalchemy
 from dataclasses import dataclass
 from typing import Tuple, Union
+
+import sqlalchemy
 
 
 @dataclass(eq=True, frozen=True, slots=True)

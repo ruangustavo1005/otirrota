@@ -1,16 +1,16 @@
 from PySide6.QtCore import QUrl
+from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
-    QWidget,
-    QPushButton,
-    QLabel,
-    QLineEdit,
+    QApplication,
     QFormLayout,
     QHBoxLayout,
+    QLabel,
+    QLineEdit,
     QMessageBox,
-    QApplication,
+    QPushButton,
     QTextBrowser,
+    QWidget,
 )
-from PySide6.QtGui import QDesktopServices
 
 from common.gui.widget.base_add_widget import BaseAddWidget
 from domain.location.model import Location
@@ -60,7 +60,7 @@ class LocationChangeWidget(BaseAddWidget):
         )
         instructions.setOpenExternalLinks(True)
 
-        instructions_html = f"""
+        instructions_html = """
         <div style="font-size: 12px; padding: 5px;">
             <p><b>Como obter coordenadas:</b></p>
             <ol>

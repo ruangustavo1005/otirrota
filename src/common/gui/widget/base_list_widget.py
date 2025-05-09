@@ -4,13 +4,13 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton,
     QTableView,
     QVBoxLayout,
-    QGroupBox,
 )
 
 from common.gui.core.table_model_default import TableModelDefault

@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Any, Dict, Generic, Optional
 
 from common.controller.base_crud_controller import BaseCRUDController
-from common.controller.base_entity_controller import ModelType
+from common.controller.base_entity_controller import BaseEntityController, ModelType
 from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_change_widget import BaseChangeWidget
 
@@ -26,6 +26,13 @@ class BaseChangeController(BaseCRUDController[ModelType], Generic[ModelType]):
         raise NotImplementedError()
 
     def execute_action(self) -> None:
+        success = self._change()
+        if success:
+            if self._caller and isinstance(self._caller, BaseEntityController):
+                print("callee_finalized")
+                self._caller.callee_finalized()
+
+    def _change(self) -> bool:
         try:
             if updates := self._get_model_updates():
                 self._entity.update(**updates)
@@ -33,10 +40,11 @@ class BaseChangeController(BaseCRUDController[ModelType], Generic[ModelType]):
                     "Sucesso",
                     f"{self._model_class.get_static_description()} alterado(a) com sucesso",
                 )
-                self._caller.update_table_data()
                 self._widget.close()
+                return True
         except Exception as e:
             self._handle_change_exception(e)
+            return False
 
     def _handle_change_exception(self, e: Exception) -> None:
         self._widget.show_error_pop_up(

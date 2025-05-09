@@ -10,10 +10,12 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from common.model.base_model import Base
+from domain.companion.model import Companion
 from domain.driver.model import Driver
 from domain.location.model import Location
 from domain.patient.model import Patient
 from domain.purpose.model import Purpose
+from domain.scheduling.model import Scheduling
 from domain.user.model import User
 from domain.vehicle.model import Vehicle
 from settings import Settings

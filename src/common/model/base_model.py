@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from contextlib import contextmanager
-from datetime import datetime
+from datetime import datetime, time
 from typing import Any, Dict, Generator, List, Optional, Type, TypeVar
 
 from sqlalchemy import Column, DateTime, Integer, Select
@@ -18,7 +18,7 @@ T = TypeVar("T", bound="BaseModel")
 class BaseModel(Base):
     __abstract__ = True
 
-    id = Column(Integer, primary_key=True, autoincrement=True, info={"title": "ID"})
+    id = Column(Integer, primary_key=True, autoincrement=True, info={"list": False})
     created_at = Column(
         DateTime,
         default=datetime.now,
@@ -51,11 +51,7 @@ class BaseModel(Base):
 
     @classmethod
     def _get_all_listable_columns(cls) -> List[Column]:
-        return (
-            [cls.id]
-            + cls._get_model_listable_columns()
-            + [cls.created_at, cls.updated_at]
-        )
+        return cls._get_model_listable_columns() + [cls.created_at, cls.updated_at]
 
     @classmethod
     def _get_model_listable_columns(cls) -> List[Column]:
@@ -109,6 +105,8 @@ class BaseModel(Base):
 
             if isinstance(value, datetime):
                 value = value.strftime("%d/%m/%Y %H:%M")
+            elif isinstance(value, time):
+                value = value.strftime("%H:%M")
             elif isinstance(value, float):
                 value = NumberUtils.float_to_str(value)
             elif isinstance(value, bool):
@@ -161,6 +159,10 @@ class BaseModel(Base):
             return session.query(cls).filter(cls.id == id).first()
 
     @classmethod
+    def apply_text_search_filter(cls, query: Select, search_text: str) -> Select:
+        raise NotImplementedError()
+
+    @classmethod
     def query(cls) -> Select:
         with Database.session_scope() as session:
             return session.query(cls)
@@ -168,6 +170,7 @@ class BaseModel(Base):
     def save(self, session: Optional[Session] = None) -> None:
         if session:
             session.add(self)
+            session.flush()
             return
 
         with self.__existent_or_new_session() as session_:
@@ -176,6 +179,7 @@ class BaseModel(Base):
     def delete(self, session: Optional[Session] = None) -> None:
         if session:
             session.delete(self)
+            session.flush()
             return
 
         with self.__existent_or_new_session() as session_:
@@ -187,6 +191,7 @@ class BaseModel(Base):
                 setattr(self, key, value)
 
         if session:
+            session.flush()
             return
 
         with self.__existent_or_new_session() as session_:

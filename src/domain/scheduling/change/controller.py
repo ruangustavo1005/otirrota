@@ -14,13 +14,9 @@ class VehicleChangeController(BaseChangeController[Vehicle]):
         self._widget.license_plate_field.setText(entity.format_license_plate())
         self._widget.description_field.setText(entity.description)
         self._widget.capacity_field.setText(str(entity.capacity))
-        if entity.default_driver:
-            self._widget.default_driver_combo_box.addItem(
-                entity.default_driver.get_combo_box_description(), entity.default_driver
-            )
-            self._widget.default_driver_combo_box.setCurrentIndexByData(
-                entity.default_driver
-            )
+        self._widget.default_driver_combo_box.setCurrentIndexByData(
+            entity.default_driver
+        )
         self._widget.active_field.setChecked(entity.active)
 
     def _get_model_updates(self) -> Optional[Dict[str, Any]]:

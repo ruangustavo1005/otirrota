@@ -12,6 +12,7 @@ alembic = "^1.15.2"
 psycopg2-binary = "^2.9.10"
 pyside6 = "^6.9.0"
 dotenv = "^0.9.9"
+python-dateutil = "^2.9.0.post0"
 
 
 [tool.poetry.group.dev.dependencies]

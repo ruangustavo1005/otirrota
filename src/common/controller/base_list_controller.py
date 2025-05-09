@@ -127,6 +127,9 @@ class BaseListController(BaseEntityController[ModelType], Generic[ModelType]):
         )
         super().show()
 
+    def callee_finalized(self) -> None:
+        self.update_table_data()
+
     def update_table_data(self) -> None:
         self._widget.disable_row_actions()
         self._selected_data = None

@@ -3,6 +3,7 @@ from typing import Generic
 from PySide6.QtWidgets import QMessageBox
 
 from common.controller.base_crud_controller import BaseCRUDController, ModelType
+from common.controller.base_entity_controller import BaseEntityController
 from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_entity_widget import BaseEntityWidget
 
@@ -22,23 +23,29 @@ class BaseRemoveController(BaseCRUDController[ModelType], Generic[ModelType]):
         self.execute_action()
 
     def execute_action(self) -> None:
-        model_description = self._model_class.get_static_description()
         option = BaseEntityWidget.show_question_pop_up(
             "Atenção",
-            f"Tem certeza que deseja excluir o(a) {model_description}?",
+            f"Tem certeza que deseja excluir o(a) {self._model_class.get_static_description()}?",
             "Esta ação não pode ser revertida.",
         )
         if option == QMessageBox.StandardButton.Ok:
-            try:
-                self._entity.delete()
-                if self._caller:
-                    self._caller.update_table_data()
-                BaseEntityWidget.show_info_pop_up(
-                    "Sucesso",
-                    f"{model_description} removido(a) com sucesso!",
-                )
-            except Exception as e:
-                self._handle_remove_exception(e)
+            success = self._remove()
+
+            if success:
+                if self._caller and isinstance(self._caller, BaseEntityController):
+                    self._caller.callee_finalized()
+
+    def _remove(self) -> bool:
+        try:
+            self._entity.delete()
+            BaseEntityWidget.show_info_pop_up(
+                "Sucesso",
+                f"{self._model_class.get_static_description()} removido(a) com sucesso!",
+            )
+            return True
+        except Exception as e:
+            self._handle_remove_exception(e)
+            return False
 
     def _handle_remove_exception(self, e: Exception) -> None:
         BaseEntityWidget.show_error_pop_up(
