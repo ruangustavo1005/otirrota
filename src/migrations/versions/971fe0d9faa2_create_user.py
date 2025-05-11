@@ -27,6 +27,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("user_name"),
     )
+    op.execute("INSERT INTO user (name, user_name, password, active, created_at, updated_at) VALUES ('Administrador', 'admin', 'admin', true, now(), now())")
     # ### end Alembic commands ###
 
 
