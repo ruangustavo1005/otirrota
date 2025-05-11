@@ -1,4 +1,5 @@
-from PySide6.QtCore import QDateTime, QEvent, Qt, QTime
+from typing import Optional
+from PySide6.QtCore import QEvent, Qt, QTime
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -7,6 +8,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLayout,
+    QPushButton,
     QTextEdit,
     QVBoxLayout,
 )
@@ -56,7 +58,7 @@ class SchedulingChangeWidget(BaseChangeWidget):
         main_layout = QVBoxLayout()
         main_layout.setAlignment(Qt.AlignTop)
 
-        form_layout = QFormLayout()
+        self.form_layout = QFormLayout()
 
         self.datetime_field = QDateTimeEdit()
         self.datetime_field.setCalendarPopup(True)
@@ -77,31 +79,39 @@ class SchedulingChangeWidget(BaseChangeWidget):
         average_duration_label.setFixedWidth(100)
         time_layout.addWidget(average_duration_label)
         time_layout.addWidget(self.average_duration_field)
-        form_layout.addRow(QLabel("Data e Hora:"), time_layout)
-
-        self.patient_field = SearchLineEdit(model_class=Patient)
-        form_layout.addRow(QLabel("Paciente:"), self.patient_field)
+        self.form_layout.addRow(QLabel("Data e Hora:"), time_layout)
 
         self.location_field = SearchLineEdit(model_class=Location)
-        form_layout.addRow(QLabel("Localização:"), self.location_field)
+        self.add_location_button = QPushButton("Adicionar Localização")
+        self.add_location_button.setFixedWidth(150)
+        location_layout = QHBoxLayout()
+        location_layout.addWidget(self.location_field)
+        location_layout.addWidget(self.add_location_button)
+        self.form_layout.addRow(QLabel("Localização:"), location_layout)
 
         self.purpose_field = ComboBox(model_class=Purpose, default_none=False)
-        form_layout.addRow(QLabel("Finalidade:"), self.purpose_field)
+        self.form_layout.addRow(QLabel("Finalidade:"), self.purpose_field)
 
-        self.sensitive_patient_checkbox = QCheckBox("")
-        form_layout.addRow(
-            QLabel("Paciente Sensível?"), self.sensitive_patient_checkbox
-        )
+        self.patient_field = SearchLineEdit(model_class=Patient)
+        self.patient_field.model_changed.connect(self._on_patient_changed)
+        self.add_patient_button = QPushButton("Adicionar Paciente")
+        self.add_patient_button.setFixedWidth(150)
+        patient_layout = QHBoxLayout()
+        patient_layout.addWidget(self.patient_field)
+        patient_layout.addWidget(self.add_patient_button)
+        self.form_layout.addRow(QLabel("Paciente:"), patient_layout)
+
+        self.sensitive_patient_checkbox = QCheckBox("Paciente Sensível")
+        self.form_layout.addRow(QLabel(""), self.sensitive_patient_checkbox)
+        
+        self.companions_widget = CompanionsGroupWidget()
+        self.form_layout.addWidget(self.companions_widget)
 
         self.description_field = QTextEdit()
         self.description_field.setFixedHeight(100)
-        form_layout.addRow(QLabel("Descrição:"), self.description_field)
+        self.form_layout.addRow(QLabel("Descrição:"), self.description_field)
 
-        main_layout.addLayout(form_layout)
-
-        self.companions_widget = CompanionsGroupWidget()
-        main_layout.addWidget(self.companions_widget)
-
+        main_layout.addLayout(self.form_layout)
         main_layout.addStretch(1)
 
         return main_layout
@@ -109,3 +119,13 @@ class SchedulingChangeWidget(BaseChangeWidget):
     def _focus_time_section(self, date):
         self.datetime_field.setCurrentSection(QDateTimeEdit.HourSection)
         self.datetime_field.setSelectedSection(QDateTimeEdit.HourSection)
+
+    def _on_patient_changed(self, patient: Optional[Patient]):
+        if patient is None:
+            self.form_layout.setRowVisible(self.sensitive_patient_checkbox, False)
+            self.sensitive_patient_checkbox.setChecked(False)
+            self.companions_widget.hide()
+            self.companions_widget.set_companions([])
+        else:
+            self.form_layout.setRowVisible(self.sensitive_patient_checkbox, True)
+            self.companions_widget.show()

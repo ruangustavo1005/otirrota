@@ -63,11 +63,12 @@ class ResultsPopup(QListView):
 
 
 class SearchLineEdit(QLineEdit, Generic[ModelType]):
+    model_changed = Signal(object)
+
     def __init__(
         self,
         parent=None,
         model_class: Type[ModelType] = None,
-        placeholder_text: str = "Pesquisar...",
         min_chars_for_search: int = 1,
         max_results: int = 10,
     ):
@@ -89,7 +90,7 @@ class SearchLineEdit(QLineEdit, Generic[ModelType]):
         self._popup_visible = False
         self._db_session = None
 
-        self.setPlaceholderText(placeholder_text)
+        self.setPlaceholderText(f"Pesquisar {self.model_class.get_static_description()}...")
 
         self.popup = ResultsPopup(self)
         self.popup.item_selected.connect(self._on_item_selected)
@@ -109,7 +110,7 @@ class SearchLineEdit(QLineEdit, Generic[ModelType]):
             self.selected_model
             and text != self.selected_model.get_combo_box_description()
         ):
-            self.selected_model = None
+            self.set_selected_model(None)
 
         text = text.strip()
         if len(text) >= self.min_chars_for_search:
@@ -184,7 +185,7 @@ class SearchLineEdit(QLineEdit, Generic[ModelType]):
 
     def _on_item_selected(self, index: int) -> None:
         if 0 <= index < len(self._filtered_items):
-            self.selected_model = self._filtered_items[index]
+            self.set_selected_model(self._filtered_items[index])
             if 0 <= index < len(self._item_descriptions):
                 self.setText(self._item_descriptions[index])
             else:
@@ -200,10 +201,12 @@ class SearchLineEdit(QLineEdit, Generic[ModelType]):
         if model is None:
             self.selected_model = None
             self.setText("")
+            self.model_changed.emit(None)
             return
 
         self.selected_model = model
         self.setText(model.get_combo_box_description())
+        self.model_changed.emit(model)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if self._popup_visible:

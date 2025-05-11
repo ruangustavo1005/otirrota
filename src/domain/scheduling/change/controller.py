@@ -4,9 +4,14 @@ from sqlalchemy.orm import Session
 
 from common.controller.base_change_controller import BaseChangeController
 from common.controller.base_entity_controller import ModelType
+from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_change_widget import BaseChangeWidget
 from db import Database
 from domain.companion.model import Companion
+from domain.location.add.controller import LocationAddController
+from domain.location.model import Location
+from domain.patient.add.controller import PatientAddController
+from domain.patient.model import Patient
 from domain.scheduling.change.widget import SchedulingChangeWidget
 from domain.scheduling.model import Scheduling
 from PySide6.QtCore import QDateTime, QDate, QTime
@@ -14,6 +19,10 @@ from PySide6.QtCore import QDateTime, QDate, QTime
 
 class SchedulingChangeController(BaseChangeController[Scheduling]):
     _widget: SchedulingChangeWidget
+
+    def __init__(self, entity: Scheduling, caller: BaseListController | None = None) -> None:
+        super().__init__(entity, caller)
+        self._last_add_action: Optional[str] = None
 
     def _populate_form(self, entity: Scheduling) -> None:
         self._widget.datetime_field.setDateTime(
@@ -32,7 +41,7 @@ class SchedulingChangeController(BaseChangeController[Scheduling]):
         self._widget.patient_field.set_selected_model(entity.patient)
         self._widget.location_field.set_selected_model(entity.location)
         self._widget.purpose_field.setCurrentIndexByData(entity.purpose)
-        self._widget.sensitive_patient_checkbox.setChecked(entity.sensitive_patient)
+        self._widget.sensitive_patient_checkbox.setChecked(bool(entity.sensitive_patient))
         self._widget.description_field.setText(entity.description)
         self._widget.companions_widget.set_companions(entity.companions)
 
@@ -43,9 +52,6 @@ class SchedulingChangeController(BaseChangeController[Scheduling]):
             return None
 
         patient = self._widget.patient_field.get_selected_model()
-        if not patient:
-            self._widget.show_info_pop_up("Atenção", "Selecione um paciente")
-            return None
 
         purpose = self._widget.purpose_field.get_current_data()
         if not purpose:
@@ -55,11 +61,11 @@ class SchedulingChangeController(BaseChangeController[Scheduling]):
         return {
             "datetime": self._widget.datetime_field.dateTime().toPython().replace(second=0, microsecond=0),
             "average_duration": self._widget.average_duration_field.time().toPython(),
-            "sensitive_patient": self._widget.sensitive_patient_checkbox.isChecked(),
+            "sensitive_patient": self._widget.sensitive_patient_checkbox.isChecked() if patient else None,
             "description": self._widget.description_field.toPlainText().strip(),
             "location_id": location.id,
             "purpose_id": purpose.id,
-            "patient_id": patient.id,
+            "patient_id": patient.id if patient else None,
         }
 
     def _change(self) -> bool:
@@ -106,3 +112,28 @@ class SchedulingChangeController(BaseChangeController[Scheduling]):
 
     def _get_model_class(self) -> Type[ModelType]:
         return Scheduling
+
+    def show(self) -> None:
+        self._widget.add_patient_button.clicked.connect(self._on_add_patient_clicked)
+        self._widget.add_location_button.clicked.connect(self._on_add_location_clicked)
+        super().show()
+
+    def _on_add_patient_clicked(self) -> None:
+        self._patient_add_controller = PatientAddController(self)
+        self._last_add_action = "patient"
+        self._patient_add_controller.show()
+
+    def _on_add_location_clicked(self) -> None:
+        self._location_add_controller = LocationAddController(self)
+        self._last_add_action = "location"
+        self._location_add_controller.show()
+
+    def callee_finalized(self) -> None:
+        if self._last_add_action == "patient":
+            self._widget.patient_field.set_selected_model(
+                Patient.query().order_by(Patient.id.desc()).first()
+            )
+        elif self._last_add_action == "location":
+            self._widget.location_field.set_selected_model(
+                Location.query().order_by(Location.id.desc()).first()
+            )

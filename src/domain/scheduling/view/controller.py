@@ -26,10 +26,10 @@ class SchedulingViewController(BaseViewController[Scheduling]):
                 entity.average_duration.second,
             )
         )
-        self._widget.patient_field.setText(entity.patient.get_combo_box_description())
+        self._widget.patient_field.setText(entity.patient.get_combo_box_description() if entity.patient else "")
         self._widget.location_field.setText(entity.location.get_combo_box_description())
         self._widget.purpose_field.setText(entity.purpose.get_combo_box_description())
-        self._widget.sensitive_patient_checkbox.setChecked(entity.sensitive_patient)
+        self._widget.sensitive_patient_checkbox.setChecked(bool(entity.sensitive_patient))
         self._widget.description_field.setText(entity.description)
         self._widget.companions_widget.set_companions(entity.companions)
 
