@@ -90,7 +90,9 @@ class SearchLineEdit(QLineEdit, Generic[ModelType]):
         self._popup_visible = False
         self._db_session = None
 
-        self.setPlaceholderText(f"Pesquisar {self.model_class.get_static_description()}...")
+        self.setPlaceholderText(
+            f"Pesquisar {self.model_class.get_static_description()}..."
+        )
 
         self.popup = ResultsPopup(self)
         self.popup.item_selected.connect(self._on_item_selected)

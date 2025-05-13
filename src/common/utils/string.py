@@ -51,7 +51,9 @@ class StringUtils:
 
     @classmethod
     def is_valid_phone(cls, phone: str) -> bool:
-        phone = phone.replace("(", "").replace(")", "").replace("-", "").replace(" ", "")
+        phone = (
+            phone.replace("(", "").replace(")", "").replace("-", "").replace(" ", "")
+        )
         return len(phone) == 11 and phone.isdigit()
 
     @classmethod

@@ -1,4 +1,5 @@
 from typing import Optional
+
 from PySide6.QtCore import QEvent, Qt, QTime
 from PySide6.QtWidgets import (
     QApplication,
@@ -103,7 +104,7 @@ class SchedulingChangeWidget(BaseChangeWidget):
 
         self.sensitive_patient_checkbox = QCheckBox("Paciente Sensível")
         self.form_layout.addRow(QLabel(""), self.sensitive_patient_checkbox)
-        
+
         self.companions_widget = CompanionsGroupWidget()
         self.form_layout.addWidget(self.companions_widget)
 

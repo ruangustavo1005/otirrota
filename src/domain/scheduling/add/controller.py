@@ -51,7 +51,9 @@ class SchedulingAddController(BaseAddController[Scheduling]):
             purpose_id=purpose.id,
             average_duration=self._widget.average_duration_field.time().toPython(),
             patient_id=patient.id if patient else None,
-            sensitive_patient=self._widget.sensitive_patient_checkbox.isChecked() if patient else None,
+            sensitive_patient=(
+                self._widget.sensitive_patient_checkbox.isChecked() if patient else None
+            ),
             description=self._widget.description_field.toPlainText().strip(),
         )
 

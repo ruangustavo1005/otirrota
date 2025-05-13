@@ -45,7 +45,9 @@ class Scheduling(BaseModel):
 
     location: Mapped[Location] = relationship("Location", foreign_keys=[location_id])
     purpose: Mapped[Purpose] = relationship("Purpose", foreign_keys=[purpose_id])
-    patient: Mapped[Optional[Patient]] = relationship("Patient", foreign_keys=[patient_id])
+    patient: Mapped[Optional[Patient]] = relationship(
+        "Patient", foreign_keys=[patient_id]
+    )
     companions: Mapped[Optional[List["Companion"]]] = relationship(
         "Companion", back_populates="scheduling", cascade="all, delete-orphan"
     )

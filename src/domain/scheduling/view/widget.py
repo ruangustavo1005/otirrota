@@ -11,11 +11,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
 )
 
-from common.gui.field.combo_box import ComboBox
 from common.gui.field.custom_time_edit import TimeEdit
 from common.gui.widget.base_view_widget import BaseViewWidget
 from domain.companion.widget.group_widget import CompanionsGroupWidget
-from domain.purpose.model import Purpose
 from domain.scheduling.model import Scheduling
 
 

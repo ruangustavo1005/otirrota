@@ -1,7 +1,8 @@
-from common.utils.string import StringUtils
 from PySide6.QtCore import QRegularExpression
 from PySide6.QtGui import QRegularExpressionValidator
 from PySide6.QtWidgets import QLineEdit
+
+from common.utils.string import StringUtils
 
 
 class CPFLineEdit(QLineEdit):

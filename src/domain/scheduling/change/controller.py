@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Type
 
+from PySide6.QtCore import QDate, QDateTime, QTime
 from sqlalchemy.orm import Session
 
 from common.controller.base_change_controller import BaseChangeController
@@ -14,13 +15,14 @@ from domain.patient.add.controller import PatientAddController
 from domain.patient.model import Patient
 from domain.scheduling.change.widget import SchedulingChangeWidget
 from domain.scheduling.model import Scheduling
-from PySide6.QtCore import QDateTime, QDate, QTime
 
 
 class SchedulingChangeController(BaseChangeController[Scheduling]):
     _widget: SchedulingChangeWidget
 
-    def __init__(self, entity: Scheduling, caller: BaseListController | None = None) -> None:
+    def __init__(
+        self, entity: Scheduling, caller: BaseListController | None = None
+    ) -> None:
         super().__init__(entity, caller)
         self._last_add_action: Optional[str] = None
 
@@ -28,7 +30,9 @@ class SchedulingChangeController(BaseChangeController[Scheduling]):
         self._widget.datetime_field.setDateTime(
             QDateTime(
                 QDate(entity.datetime.year, entity.datetime.month, entity.datetime.day),
-                QTime(entity.datetime.hour, entity.datetime.minute, entity.datetime.second),
+                QTime(
+                    entity.datetime.hour, entity.datetime.minute, entity.datetime.second
+                ),
             )
         )
         self._widget.average_duration_field.setTime(
@@ -41,7 +45,9 @@ class SchedulingChangeController(BaseChangeController[Scheduling]):
         self._widget.patient_field.set_selected_model(entity.patient)
         self._widget.location_field.set_selected_model(entity.location)
         self._widget.purpose_field.setCurrentIndexByData(entity.purpose)
-        self._widget.sensitive_patient_checkbox.setChecked(bool(entity.sensitive_patient))
+        self._widget.sensitive_patient_checkbox.setChecked(
+            bool(entity.sensitive_patient)
+        )
         self._widget.description_field.setText(entity.description)
         self._widget.companions_widget.set_companions(entity.companions)
 
@@ -59,9 +65,13 @@ class SchedulingChangeController(BaseChangeController[Scheduling]):
             return None
 
         return {
-            "datetime": self._widget.datetime_field.dateTime().toPython().replace(second=0, microsecond=0),
+            "datetime": self._widget.datetime_field.dateTime()
+            .toPython()
+            .replace(second=0, microsecond=0),
             "average_duration": self._widget.average_duration_field.time().toPython(),
-            "sensitive_patient": self._widget.sensitive_patient_checkbox.isChecked() if patient else None,
+            "sensitive_patient": (
+                self._widget.sensitive_patient_checkbox.isChecked() if patient else None
+            ),
             "description": self._widget.description_field.toPlainText().strip(),
             "location_id": location.id,
             "purpose_id": purpose.id,

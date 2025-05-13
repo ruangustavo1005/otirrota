@@ -37,7 +37,9 @@ class BaseChangeController(BaseCRUDController[ModelType], Generic[ModelType]):
         with Database.session_scope() as session:
             try:
                 if updates := self._get_model_updates():
-                    entity = self._model_class.get_by_id(self._entity_id, session=session)
+                    entity = self._model_class.get_by_id(
+                        self._entity_id, session=session
+                    )
                     entity.update(session=session, **updates)
                     session.flush()
                     self._widget.show_info_pop_up(
