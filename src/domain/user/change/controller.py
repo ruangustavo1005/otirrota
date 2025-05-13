@@ -1,4 +1,3 @@
-import hashlib
 from typing import Any, Dict, Optional, Type
 
 from sqlalchemy.exc import IntegrityError
@@ -6,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from common.controller.base_change_controller import BaseChangeController
 from common.controller.base_entity_controller import ModelType
 from common.gui.widget.base_change_widget import BaseChangeWidget
+from common.utils.md5 import Md5Utils
 from domain.user.change.widget import UserChangeWidget
 from domain.user.model import User
 
@@ -49,7 +49,7 @@ class UserChangeController(BaseChangeController[User]):
         }
 
         if password:
-            updates["password"] = hashlib.md5(password.strip().encode()).hexdigest()
+            updates["password"] = Md5Utils.md5(password)
 
         return updates
 

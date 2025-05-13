@@ -1,4 +1,3 @@
-import hashlib
 from typing import Optional, Type
 
 from sqlalchemy.exc import IntegrityError
@@ -6,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from common.controller.base_add_controller import BaseAddController
 from common.controller.base_entity_controller import ModelType
 from common.gui.widget.base_add_widget import BaseAddWidget
+from common.utils.md5 import Md5Utils
 from domain.user.add.widget import UserAddWidget
 from domain.user.model import User
 
@@ -37,7 +37,7 @@ class UserAddController(BaseAddController[User]):
         return User(
             name=name.strip(),
             user_name=user_name.strip(),
-            password=hashlib.md5(password.strip().encode()).hexdigest(),
+            password=Md5Utils.md5(password),
         )
 
     def _handle_add_exception(self, e: Exception) -> None:
