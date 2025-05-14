@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QGroupBox,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLineEdit,
     QPushButton,
@@ -126,7 +127,7 @@ class BaseListWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
 
         return layout
 
-    def _configure_table_columns(self, header):
+    def _configure_table_columns(self, header: QHeaderView) -> None:
         header.setSectionResizeMode(header.ResizeMode.Stretch)
         header.setStretchLastSection(True)
 

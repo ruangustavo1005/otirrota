@@ -13,6 +13,7 @@ from domain.purpose.model import Purpose
 
 if TYPE_CHECKING:
     from domain.companion.model import Companion
+    from domain.roadmap.model import Roadmap
 
 
 class Scheduling(BaseModel):
@@ -41,12 +42,21 @@ class Scheduling(BaseModel):
     sensitive_patient = Column(
         Boolean, nullable=True, info={"title": "Paciente Sensível?"}
     )
+    roadmap_id = Column(
+        Integer,
+        ForeignKey("roadmap.id", ondelete="SET NULL"),
+        nullable=True,
+        info={"list": False},
+    )
     description = Column(String, nullable=True, info={"list": False})
 
     location: Mapped[Location] = relationship("Location", foreign_keys=[location_id])
     purpose: Mapped[Purpose] = relationship("Purpose", foreign_keys=[purpose_id])
     patient: Mapped[Optional[Patient]] = relationship(
         "Patient", foreign_keys=[patient_id]
+    )
+    roadmap: Mapped[Optional["Roadmap"]] = relationship(
+        "Roadmap", foreign_keys=[roadmap_id], back_populates="schedulings"
     )
     companions: Mapped[Optional[List["Companion"]]] = relationship(
         "Companion", back_populates="scheduling", cascade="all, delete-orphan"
@@ -60,6 +70,7 @@ class Scheduling(BaseModel):
         average_duration: time = None,
         patient_id: int = None,
         sensitive_patient: bool = False,
+        roadmap_id: int = None,
         description: str = None,
     ):
         super().__init__()
@@ -69,6 +80,7 @@ class Scheduling(BaseModel):
         self.average_duration = average_duration
         self.patient_id = patient_id
         self.sensitive_patient = sensitive_patient
+        self.roadmap_id = roadmap_id
         self.description = description
 
     def format_for_table(self) -> List[Any]:
@@ -77,11 +89,22 @@ class Scheduling(BaseModel):
         result[1] = self.location.get_description()
         result[2] = self.purpose.get_description()
         result[4] = self.patient.get_description() if self.patient else ""
+        result[5] = self.roadmap is not None
 
         if self.companions:
             result[4] += f" (+{len(self.companions)})"
 
         return result
+
+    @classmethod
+    def _get_model_listable_columns(cls) -> List[Column]:
+        return super()._get_model_listable_columns() + [
+            Column(
+                name="roadmap_exists",
+                type_=Boolean,
+                info={"title": "Possui Roteiro?"},
+            ),
+        ]
 
     def get_description(self) -> str:
         datetime_str = self.datetime.strftime("%d/%m/%Y %H:%M")
@@ -92,6 +115,11 @@ class Scheduling(BaseModel):
         purpose = self.purpose.get_description()
 
         return f"[{datetime_str}] {location} ({purpose}) {patient}".strip()
+
+    def get_passenger_count(self) -> int:
+        return (
+            1 + (len(self.companions) if self.companions else 0) if self.patient else 0
+        )
 
     @classmethod
     def get_static_description(cls) -> str:
