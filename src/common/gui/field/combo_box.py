@@ -9,6 +9,7 @@ ModelType = TypeVar("ModelType", bound=BaseModel)
 
 class ComboBox(QComboBox, Generic[ModelType]):
     model_class: Type[ModelType]
+    _data: List[ModelType]
 
     def __init__(
         self,
@@ -25,10 +26,14 @@ class ComboBox(QComboBox, Generic[ModelType]):
         if default_none:
             self.addItem("", None)
         for item in self._list_for_fill():
+            self._data.append(item)
             self.addItem(item.get_combo_box_description(), item)
 
     def _list_for_fill(self) -> List[ModelType]:
         return self.model_class.list_for_combo_box()
+
+    def get_data(self) -> List[ModelType]:
+        return self._data
 
     def setCurrentIndexByData(self, data_value: Any) -> None:
         index = next(i for i in range(self.count()) if self.itemData(i) == data_value)
@@ -36,3 +41,7 @@ class ComboBox(QComboBox, Generic[ModelType]):
 
     def get_current_data(self) -> Union[ModelType, None]:
         return self.itemData(self.currentIndex())
+
+    def clear(self) -> None:
+        super().clear()
+        self._data = []

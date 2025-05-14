@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from contextlib import contextmanager
-from datetime import datetime, time
+from datetime import date, datetime, time
 from typing import Any, Dict, Generator, List, Optional, Type, TypeVar
 
 from sqlalchemy import Column, DateTime, Integer, Select
@@ -105,6 +105,8 @@ class BaseModel(Base):
 
             if isinstance(value, datetime):
                 value = value.strftime("%d/%m/%Y %H:%M")
+            elif isinstance(value, date):
+                value = value.strftime("%d/%m/%Y")
             elif isinstance(value, time):
                 value = value.strftime("%H:%M")
             elif isinstance(value, float):

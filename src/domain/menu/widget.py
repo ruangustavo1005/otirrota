@@ -44,6 +44,9 @@ class MenuWidget(BaseWidget):
         self.scheduling_menu_item = QAction(
             text="Agendamentos", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
         )
+        self.roadmap_menu_item = QAction(
+            text="Rotas", icon=QIcon(Settings.FAV_ICON_FILE_NAME), parent=self
+        )
         self.routes_menu.addActions(
             [
                 self.purpose_menu_item,
@@ -53,6 +56,7 @@ class MenuWidget(BaseWidget):
                 self.patient_menu_item,
                 self.location_menu_item,
                 self.scheduling_menu_item,
+                self.roadmap_menu_item,
             ]
         )
 

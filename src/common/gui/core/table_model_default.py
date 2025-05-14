@@ -15,13 +15,22 @@ class TableModelDefault(QAbstractTableModel, Generic[ModelType]):
         self._data = data or []
         self._original_objects: List[ModelType] = []
 
-    def rowCount(self, parent: Union[QModelIndex, QPersistentModelIndex] = None):
+    def rowCount(
+        self, parent: Union[QModelIndex, QPersistentModelIndex] = None
+    ) -> int:
         return len(self._data)
 
-    def columnCount(self, parent: Union[QModelIndex, QPersistentModelIndex] = None):
+    def columnCount(
+        self, parent: Union[QModelIndex, QPersistentModelIndex] = None
+    ) -> int:
         return len(self._headers)
 
-    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+    def headerData(
+        self,
+        section: int,
+        orientation: Qt.Orientation,
+        role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole,
+    ):
         if (
             role == Qt.ItemDataRole.DisplayRole
             and orientation == Qt.Orientation.Horizontal
@@ -30,7 +39,9 @@ class TableModelDefault(QAbstractTableModel, Generic[ModelType]):
             return self._headers[section]
         return None
 
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+    def data(
+        self, index: QModelIndex, role: Qt.ItemDataRole = Qt.ItemDataRole.DisplayRole
+    ):
         if role == Qt.ItemDataRole.DisplayRole:
             return self._data[index.row()][index.column()]
         return None

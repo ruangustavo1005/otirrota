@@ -15,6 +15,7 @@ from domain.driver.model import Driver
 from domain.location.model import Location
 from domain.patient.model import Patient
 from domain.purpose.model import Purpose
+from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
 from domain.user.model import User
 from domain.vehicle.model import Vehicle
