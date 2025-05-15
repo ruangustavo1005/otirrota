@@ -1,27 +1,23 @@
-from typing import Optional
-
-from PySide6.QtCore import QDate, Qt, QEvent, QTime
+from PySide6.QtCore import QDate, QEvent, Qt, QTime
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
-    QCheckBox,
     QDateEdit,
     QFormLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLayout,
     QPushButton,
     QTableWidget,
-    QHeaderView,
-    QAbstractItemView,
-    QVBoxLayout,
     QTableWidgetItem,
+    QVBoxLayout,
 )
 
 from common.gui.field.combo_box import ComboBox
 from common.gui.field.custom_time_edit import TimeEdit
 from common.gui.widget.base_add_widget import BaseAddWidget
 from domain.driver.field.active_drivers_combo_box import ActiveDriversComboBox
-from domain.driver.model import Driver
 from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
 from domain.vehicle.model import Vehicle
@@ -60,7 +56,7 @@ class RoadmapAddWidget(BaseAddWidget):
 
     def _create_form_fields(self) -> QLayout:
         layout = QVBoxLayout()
-       
+
         layout.addLayout(self._create_first_form_part_layout())
         layout.addLayout(self._create_scheduling_table_layout())
         layout.addLayout(self._create_second_form_part_layout())
@@ -75,7 +71,9 @@ class RoadmapAddWidget(BaseAddWidget):
         self.date_field.setDisplayFormat("dd/MM/yyyy")
         current_date = QDate.currentDate()
         self.date_field.setDate(
-            current_date.addDays(3 if current_date.dayOfWeek() == Qt.DayOfWeek.Friday else 1)
+            current_date.addDays(
+                3 if current_date.dayOfWeek() == Qt.DayOfWeek.Friday else 1
+            )
         )
         self.date_field.setFixedWidth(100)
         layout.addRow(QLabel("Data:"), self.date_field)
@@ -101,7 +99,8 @@ class RoadmapAddWidget(BaseAddWidget):
         if driver is not None:
             vehicle = next(
                 (
-                    v for v in self.vehicle_combo_box.get_data()
+                    v
+                    for v in self.vehicle_combo_box.get_data()
                     if v.default_driver_id == driver.id
                 ),
                 None,
@@ -114,8 +113,12 @@ class RoadmapAddWidget(BaseAddWidget):
         if scheduling is not None:
             row_count = self.schedulings_table.rowCount()
             self.schedulings_table.insertRow(row_count)
-            self.schedulings_table.setItem(row_count, 0, QTableWidgetItem(str(scheduling.id)))
-            self.schedulings_table.setItem(row_count, 1, QTableWidgetItem(scheduling.get_description()))
+            self.schedulings_table.setItem(
+                row_count, 0, QTableWidgetItem(str(scheduling.id))
+            )
+            self.schedulings_table.setItem(
+                row_count, 1, QTableWidgetItem(scheduling.get_description())
+            )
             self.scheduling_combo_box.setCurrentIndex(0)
 
     def _create_scheduling_table_layout(self) -> QLayout:
@@ -124,12 +127,24 @@ class RoadmapAddWidget(BaseAddWidget):
         self.schedulings_table.setColumnCount(2)
         self.schedulings_table.setHorizontalHeaderLabels(["ID", "Agendamento"])
         self.schedulings_table.setColumnWidth(0, 1)
-        self.schedulings_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
-        self.schedulings_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-        self.schedulings_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
-        self.schedulings_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
-        self.schedulings_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        self.schedulings_table.itemSelectionChanged.connect(self._on_scheduling_selection_changed)
+        self.schedulings_table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Fixed
+        )
+        self.schedulings_table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.Stretch
+        )
+        self.schedulings_table.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.schedulings_table.setSelectionMode(
+            QAbstractItemView.SelectionMode.SingleSelection
+        )
+        self.schedulings_table.setEditTriggers(
+            QAbstractItemView.EditTrigger.NoEditTriggers
+        )
+        self.schedulings_table.itemSelectionChanged.connect(
+            self._on_scheduling_selection_changed
+        )
         scheduling_table_layout.addWidget(self.schedulings_table)
 
         self.remove_scheduling_button = QPushButton("Remover Agendamento Selecionado")
@@ -163,7 +178,7 @@ class RoadmapAddWidget(BaseAddWidget):
         self.departure_time_field.setTime(QTime(1, 0))
         self.departure_time_field.setFixedWidth(50)
         times_layout.addWidget(self.departure_time_field)
-        
+
         times_layout.addWidget(QLabel("Chegada:"))
         self.arrival_time_field = TimeEdit(step_minutes=15)
         self.arrival_time_field.setTimeRange(QTime(0, 0, 0), QTime(23, 59, 0))
@@ -175,9 +190,7 @@ class RoadmapAddWidget(BaseAddWidget):
 
         self.calculate_departure_arrival_button = QPushButton("Sugerir Horários")
         times_layout.addWidget(self.calculate_departure_arrival_button)
-        
+
         layout.addRow(QLabel("Saída:"), times_layout)
 
         return layout
-
-

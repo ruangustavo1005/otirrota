@@ -9,4 +9,4 @@ class ActiveDriversComboBox(ComboBox):
         super().__init__(parent, model_class=Driver, default_none=default_none)
 
     def _list_for_fill(self) -> List[Driver]:
-        return Driver.query().filter(Driver.active == True).all()
+        return Driver.query().filter(Driver.active == True).all()  # noqa: E712

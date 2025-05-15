@@ -33,13 +33,17 @@ class RoadmapAddController(BaseAddController[Roadmap]):
 
         date = self._widget.date_field.dateTime().toPython()
         if date <= datetime.now().date():
-            self._widget.show_info_pop_up("Atenção", "A data tem que ser maior que a hoje")
+            self._widget.show_info_pop_up(
+                "Atenção", "A data tem que ser maior que a hoje"
+            )
             return None
 
         departure_time = self._widget.departure_time_field.time()
         arrival_time = self._widget.arrival_time_field.time()
         if departure_time >= arrival_time:
-            self._widget.show_info_pop_up("Atenção", "A hora de partida tem que ser menor que a hora de chegada")
+            self._widget.show_info_pop_up(
+                "Atenção", "A hora de partida tem que ser menor que a hora de chegada"
+            )
             return None
 
         return Roadmap(
@@ -47,7 +51,7 @@ class RoadmapAddController(BaseAddController[Roadmap]):
             vehicle_id=vehicle.id,
             departure=datetime.combine(date, departure_time),
             arrival=datetime.combine(date, arrival_time),
-            creation_user_id=Settings.get_logged_user().id
+            creation_user_id=Settings.get_logged_user().id,
         )
 
     def _save(self) -> bool:
@@ -75,17 +79,23 @@ class RoadmapAddController(BaseAddController[Roadmap]):
     def save_schedulings(self, roadmap: Roadmap, session: Session) -> None:
         scheduling_ids = []
         for row in range(self._widget.schedulings_table.rowCount()):
-            scheduling_id = self._widget.schedulings_table.item(row, 0).data(Qt.DisplayRole)
+            scheduling_id = self._widget.schedulings_table.item(row, 0).data(
+                Qt.DisplayRole
+            )
             if scheduling_id:
                 scheduling_ids.append(int(scheduling_id))
 
         total_passangers = 0
-        schedulings = session.query(Scheduling).filter(Scheduling.id.in_(scheduling_ids)).all()
+        schedulings = (
+            session.query(Scheduling).filter(Scheduling.id.in_(scheduling_ids)).all()
+        )
         for scheduling in schedulings:
             total_passangers += scheduling.get_passenger_count()
 
         if total_passangers > roadmap.vehicle.capacity:
-            raise ValueError(f"O veículo não tem capacidade para transportar todos {total_passangers} passageiros")
+            raise ValueError(
+                f"O veículo não tem capacidade para transportar todos {total_passangers} passageiros"
+            )
 
         for scheduling in schedulings:
             scheduling.roadmap_id = roadmap.id
@@ -98,7 +108,9 @@ class RoadmapAddController(BaseAddController[Roadmap]):
         return Roadmap
 
     def show(self) -> None:
-        self._widget.calculate_departure_arrival_button.clicked.connect(self._on_calculate_departure_arrival_clicked)
+        self._widget.calculate_departure_arrival_button.clicked.connect(
+            self._on_calculate_departure_arrival_clicked
+        )
         super().show()
 
     def _on_calculate_departure_arrival_clicked(self) -> None:

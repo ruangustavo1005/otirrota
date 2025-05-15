@@ -1,3 +1,4 @@
+# flake8: noqa F401
 from domain.companion.model import Companion
 from domain.driver.model import Driver
 from domain.location.model import Location

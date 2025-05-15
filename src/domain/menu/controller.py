@@ -45,7 +45,6 @@ class MenuController(BaseController):
             self.__roadmap_menu_item_triggered
         )
 
-
     def __purpose_menu_item_triggered(self) -> None:
         self.purpose_list_controller = PurposeListController()
         self.purpose_list_controller.show()

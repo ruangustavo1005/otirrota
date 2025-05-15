@@ -15,9 +15,7 @@ class TableModelDefault(QAbstractTableModel, Generic[ModelType]):
         self._data = data or []
         self._original_objects: List[ModelType] = []
 
-    def rowCount(
-        self, parent: Union[QModelIndex, QPersistentModelIndex] = None
-    ) -> int:
+    def rowCount(self, parent: Union[QModelIndex, QPersistentModelIndex] = None) -> int:
         return len(self._data)
 
     def columnCount(
