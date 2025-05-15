@@ -33,7 +33,9 @@ class VehicleListController(BaseListController[Vehicle]):
                 Vehicle.description.ilike(f"%{self._widget.description_filter.text()}%")
             )
 
-        filters.append(Vehicle.active == self._widget.active_filter.isChecked())
+        active_filter = self._widget.active_filter.get_current_data()
+        if active_filter is not None:
+            filters.append(Vehicle.active == active_filter)
         return filters
 
     def _set_widget_connections(self) -> None:

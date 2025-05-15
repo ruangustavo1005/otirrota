@@ -62,11 +62,15 @@ class Roadmap(BaseModel):
     def format_for_table(self) -> List[Any]:
         result = super().format_for_table()
 
-        result[1] = self.driver.get_description()
-        result[2] = self.vehicle.get_description()
-        result[3] = date(self.departure.year, self.departure.month, self.departure.day)
-        result[4] = time(self.departure.hour, self.departure.minute)
-        result[5] = time(self.arrival.hour, self.arrival.minute)
+        result[2] = self.format_value_for_table(
+            date(self.departure.year, self.departure.month, self.departure.day)
+        )
+        result[3] = self.format_value_for_table(
+            time(self.departure.hour, self.departure.minute)
+        )
+        result[4] = self.format_value_for_table(
+            time(self.arrival.hour, self.arrival.minute)
+        )
 
         return result
 

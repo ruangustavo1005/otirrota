@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Optional, Type
 
-from PySide6.QtCore import Qt
 from sqlalchemy.orm import Session
 
 from common.controller.base_add_controller import BaseAddController
@@ -17,9 +16,6 @@ from settings import Settings
 class RoadmapAddController(BaseAddController[Roadmap]):
     _widget: RoadmapAddWidget
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
     def _get_populated_model(self) -> Optional[Roadmap]:
         driver = self._widget.driver_combo_box.get_current_data()
         if not driver:
@@ -31,15 +27,15 @@ class RoadmapAddController(BaseAddController[Roadmap]):
             self._widget.show_info_pop_up("Atenção", "Selecione um veículo")
             return None
 
-        date = self._widget.date_field.dateTime().toPython()
+        date = self._widget.date_field.date().toPython()
         if date <= datetime.now().date():
             self._widget.show_info_pop_up(
                 "Atenção", "A data tem que ser maior que a hoje"
             )
             return None
 
-        departure_time = self._widget.departure_time_field.time()
-        arrival_time = self._widget.arrival_time_field.time()
+        departure_time = self._widget.departure_time_field.time().toPython()
+        arrival_time = self._widget.arrival_time_field.time().toPython()
         if departure_time >= arrival_time:
             self._widget.show_info_pop_up(
                 "Atenção", "A hora de partida tem que ser menor que a hora de chegada"
@@ -77,13 +73,10 @@ class RoadmapAddController(BaseAddController[Roadmap]):
                 return False
 
     def save_schedulings(self, roadmap: Roadmap, session: Session) -> None:
-        scheduling_ids = []
-        for row in range(self._widget.schedulings_table.rowCount()):
-            scheduling_id = self._widget.schedulings_table.item(row, 0).data(
-                Qt.DisplayRole
-            )
-            if scheduling_id:
-                scheduling_ids.append(int(scheduling_id))
+        scheduling_ids = self._widget._get_scheduling_ids_from_table()
+
+        if not scheduling_ids:
+            raise ValueError("Adicione pelo menos um agendamento")
 
         total_passangers = 0
         schedulings = (
@@ -110,6 +103,9 @@ class RoadmapAddController(BaseAddController[Roadmap]):
     def show(self) -> None:
         self._widget.calculate_departure_arrival_button.clicked.connect(
             self._on_calculate_departure_arrival_clicked
+        )
+        self._widget.scheduling_combo_box.fill(
+            date=self._widget.date_field.date().toPython(),
         )
         super().show()
 

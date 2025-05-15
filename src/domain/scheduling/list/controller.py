@@ -45,6 +45,13 @@ class SchedulingListController(BaseListController[Scheduling]):
         filters.append(Scheduling.datetime.between(start_date, end_date))
         print(start_date.strftime("%Y-%m-%d %H:%M:%S"))
         print(end_date.strftime("%Y-%m-%d %H:%M:%S"))
+        roadman_exists_filter = self._widget.roadmap_exists_filter.get_current_data()
+        if roadman_exists_filter is not None:
+            filters.append(
+                Scheduling.roadmap_id.isnot(None)
+                if roadman_exists_filter
+                else Scheduling.roadmap_id.is_(None)
+            )
         return filters
 
     def _build_start_end_date_filters(

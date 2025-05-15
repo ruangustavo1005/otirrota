@@ -3,6 +3,7 @@ from enum import Enum
 from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import QComboBox, QDateEdit, QHBoxLayout, QLabel
 
+from common.gui.field.boolean_combo_box import BooleanComboBox
 from common.gui.widget.base_list_widget import BaseListWidget
 from domain.scheduling.model import Scheduling
 
@@ -47,6 +48,18 @@ class SchedulingListWidget(BaseListWidget[Scheduling]):
         self.date_filter.setDate(QDate.currentDate())
         self.date_filter.dateChanged.connect(self.update_button.click)
         filter_area_layout.addWidget(self.date_filter)
+
+        roadmap_exists_label = QLabel("Possui Roteiro?")
+        roadmap_exists_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        roadmap_exists_label.setFixedWidth(100)
+        filter_area_layout.addWidget(roadmap_exists_label)
+
+        self.roadmap_exists_filter = BooleanComboBox()
+        self.roadmap_exists_filter.currentIndexChanged.connect(self.update_button.click)
+        self.roadmap_exists_filter.setFixedWidth(100)
+        filter_area_layout.addWidget(self.roadmap_exists_filter)
 
 
 class SchedulingDateTypeFilterEnum(str, Enum):

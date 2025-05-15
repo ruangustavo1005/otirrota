@@ -1,3 +1,5 @@
+from typing import List
+
 from PySide6.QtCore import QDate, QEvent, Qt, QTime
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -76,6 +78,7 @@ class RoadmapAddWidget(BaseAddWidget):
             )
         )
         self.date_field.setFixedWidth(100)
+        self.date_field.dateChanged.connect(self._fill_schedulings_combo_box)
         layout.addRow(QLabel("Data:"), self.date_field)
 
         self.driver_combo_box = ActiveDriversComboBox()
@@ -86,7 +89,7 @@ class RoadmapAddWidget(BaseAddWidget):
         layout.addRow(QLabel("Veículo:"), self.vehicle_combo_box)
 
         scheduling_layout = QHBoxLayout()
-        self.scheduling_combo_box = ComboBox(model_class=Scheduling)
+        self.scheduling_combo_box = ComboBox(model_class=Scheduling, load=False)
         self.add_scheduling_button = QPushButton("Adicionar")
         self.add_scheduling_button.clicked.connect(self._add_scheduling_to_table)
         scheduling_layout.addWidget(self.scheduling_combo_box)
@@ -119,7 +122,21 @@ class RoadmapAddWidget(BaseAddWidget):
             self.schedulings_table.setItem(
                 row_count, 1, QTableWidgetItem(scheduling.get_description())
             )
-            self.scheduling_combo_box.setCurrentIndex(0)
+            self._fill_schedulings_combo_box()
+
+    def _fill_schedulings_combo_box(self) -> None:
+        self.scheduling_combo_box.fill(
+            date=self.date_field.date().toPython(),
+            ids_ignore=self._get_scheduling_ids_from_table(),
+        )
+
+    def _get_scheduling_ids_from_table(self) -> List[int]:
+        scheduling_ids = []
+        for row in range(self.schedulings_table.rowCount()):
+            scheduling_id = self.schedulings_table.item(row, 0).data(Qt.DisplayRole)
+            if scheduling_id:
+                scheduling_ids.append(int(scheduling_id))
+        return scheduling_ids
 
     def _create_scheduling_table_layout(self) -> QLayout:
         scheduling_table_layout = QVBoxLayout()
@@ -166,6 +183,7 @@ class RoadmapAddWidget(BaseAddWidget):
         selected_rows = self.schedulings_table.selectedIndexes()
         if selected_rows:
             self.schedulings_table.removeRow(selected_rows[0].row())
+            self._fill_schedulings_combo_box()
 
     def _create_second_form_part_layout(self) -> QLayout:
         layout = QFormLayout()

@@ -80,3 +80,12 @@ class RoadmapListController(BaseListController[Roadmap]):
     # def __view_button_clicked(self) -> None:
     #     self.view_controller = SchedulingViewController(self._selected_model, self)
     #     self.view_controller.show()
+
+    def _on_table_selection_changed(self) -> None:
+        super()._on_table_selection_changed()
+        if (
+            self._selected_model
+            and self._selected_model.departure.date() < datetime.now().date()
+        ):
+            self._widget.change_button.setDisabled(True)
+            self._widget.remove_button.setDisabled(True)

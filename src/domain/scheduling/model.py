@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime, time  # noqa: F401
 from typing import TYPE_CHECKING, Any, List, Optional
 
+from dateutil.relativedelta import relativedelta
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Time
 from sqlalchemy.orm import Mapped, relationship
 
@@ -83,13 +84,36 @@ class Scheduling(BaseModel):
         self.roadmap_id = roadmap_id
         self.description = description
 
+    def get_roadmap_exists(self) -> bool:
+        return self.roadmap is not None
+
+    @classmethod
+    def list_for_combo_box(cls, **kwargs: Any) -> List[Scheduling]:
+        date = kwargs.get("date")
+        ids_ignore = kwargs.get("ids_ignore", [])
+        if date:
+            start_datetime = datetime(
+                year=date.year,
+                month=date.month,
+                day=date.day,
+                hour=0,
+                minute=0,
+                second=0,
+            )
+            end_datetime = start_datetime + relativedelta(days=1)
+            query = (
+                cls.query()
+                .filter(cls.datetime >= start_datetime)
+                .filter(cls.datetime <= end_datetime)
+                .order_by(cls.id)
+            )
+            if ids_ignore:
+                query = query.filter(cls.id.notin_(ids_ignore))
+            return [record for record in query]
+        return super().list_for_combo_box(**kwargs)
+
     def format_for_table(self) -> List[Any]:
         result = super().format_for_table()
-
-        result[1] = self.location.get_description()
-        result[2] = self.purpose.get_description()
-        result[4] = self.patient.get_description() if self.patient else ""
-        result[5] = self.roadmap is not None
 
         if self.companions:
             result[4] += f" (+{len(self.companions)})"

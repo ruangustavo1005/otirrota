@@ -1,34 +1,35 @@
-from typing import Optional
+from typing import List
 
 from PySide6.QtCore import QEvent, Qt, QTime
 from PySide6.QtWidgets import (
+    QAbstractItemView,
     QApplication,
-    QCheckBox,
-    QDateTimeEdit,
+    QDateEdit,
     QFormLayout,
     QHBoxLayout,
+    QHeaderView,
     QLabel,
     QLayout,
+    QLineEdit,
     QPushButton,
-    QTextEdit,
+    QTableWidget,
+    QTableWidgetItem,
     QVBoxLayout,
 )
 
 from common.gui.field.combo_box import ComboBox
 from common.gui.field.custom_time_edit import TimeEdit
-from common.gui.field.search_line_edit import SearchLineEdit
 from common.gui.widget.base_change_widget import BaseChangeWidget
-from domain.companion.widget.group_widget import CompanionsGroupWidget
-from domain.location.model import Location
-from domain.patient.model import Patient
-from domain.purpose.model import Purpose
+from domain.driver.model import Driver
+from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
+from domain.vehicle.model import Vehicle
 
 
-class SchedulingChangeWidget(BaseChangeWidget):
+class RoadmapChangeWidget(BaseChangeWidget):
     def __init__(self, parent=None):
         super().__init__(
-            model_class=Scheduling,
+            model_class=Roadmap,
             width=650,
             height=650,
             parent=parent,
@@ -38,95 +39,175 @@ class SchedulingChangeWidget(BaseChangeWidget):
 
     def eventFilter(self, watched, event):
         if event.type() == QEvent.MouseButtonRelease:
-            if hasattr(self, "datetime_field") and self.datetime_field.underMouse():
-                self.datetime_field.setSelectedSection(
-                    self.datetime_field.currentSection()
-                )
-                return False
-
             if (
-                hasattr(self, "average_duration_field")
-                and self.average_duration_field.underMouse()
+                hasattr(self, "departure_time_field")
+                and self.departure_time_field.underMouse()
             ):
-                self.average_duration_field.setSelectedSection(
-                    self.average_duration_field.currentSection()
+                self.departure_time_field.setSelectedSection(
+                    self.departure_time_field.currentSection()
                 )
                 return False
+            if (
+                hasattr(self, "arrival_time_field")
+                and self.arrival_time_field.underMouse()
+            ):
+                self.arrival_time_field.setSelectedSection(
+                    self.arrival_time_field.currentSection()
+                )
 
         return super().eventFilter(watched, event)
 
     def _create_form_fields(self) -> QLayout:
-        main_layout = QVBoxLayout()
-        main_layout.setAlignment(Qt.AlignTop)
+        layout = QVBoxLayout()
 
-        self.form_layout = QFormLayout()
+        layout.addLayout(self._create_first_form_part_layout())
+        layout.addLayout(self._create_scheduling_table_layout())
+        layout.addLayout(self._create_second_form_part_layout())
 
-        self.datetime_field = QDateTimeEdit()
-        self.datetime_field.setCalendarPopup(True)
-        self.datetime_field.setDisplayFormat("dd/MM/yyyy HH:mm")
-        self.datetime_field.setFixedWidth(120)
-        self.datetime_field.dateChanged.connect(self._focus_time_section)
+        return layout
 
-        self.average_duration_field = TimeEdit(step_minutes=30)
-        self.average_duration_field.setTimeRange(QTime(0, 0, 0), QTime(12, 0, 0))
-        self.average_duration_field.setDisplayFormat("HH:mm")
-        self.average_duration_field.setCurrentSection(TimeEdit.MinuteSection)
-        self.average_duration_field.setFixedWidth(50)
+    def _create_first_form_part_layout(self) -> QLayout:
+        layout = QFormLayout()
 
-        time_layout = QHBoxLayout()
-        time_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        time_layout.addWidget(self.datetime_field)
-        average_duration_label = QLabel("Duração Estimada:")
-        average_duration_label.setFixedWidth(100)
-        time_layout.addWidget(average_duration_label)
-        time_layout.addWidget(self.average_duration_field)
-        self.form_layout.addRow(QLabel("Data e Hora:"), time_layout)
+        self.date_field = QDateEdit()
+        self.date_field.setCalendarPopup(True)
+        self.date_field.setDisplayFormat("dd/MM/yyyy")
+        self.date_field.setFixedWidth(100)
+        self.date_field.dateChanged.connect(self._fill_schedulings_combo_box)
+        layout.addRow(QLabel("Data:"), self.date_field)
 
-        self.location_field = SearchLineEdit(model_class=Location)
-        self.add_location_button = QPushButton("Adicionar Localização")
-        self.add_location_button.setFixedWidth(150)
-        location_layout = QHBoxLayout()
-        location_layout.addWidget(self.location_field)
-        location_layout.addWidget(self.add_location_button)
-        self.form_layout.addRow(QLabel("Localização:"), location_layout)
+        self.driver_combo_box = ComboBox(model_class=Driver)
+        self.driver_combo_box.currentIndexChanged.connect(self._on_driver_changed)
+        layout.addRow(QLabel("Motorista:"), self.driver_combo_box)
 
-        self.purpose_field = ComboBox(model_class=Purpose, default_none=False)
-        self.form_layout.addRow(QLabel("Finalidade:"), self.purpose_field)
+        self.vehicle_combo_box = ComboBox(model_class=Vehicle)
+        layout.addRow(QLabel("Veículo:"), self.vehicle_combo_box)
 
-        self.patient_field = SearchLineEdit(model_class=Patient)
-        self.patient_field.model_changed.connect(self._on_patient_changed)
-        self.add_patient_button = QPushButton("Adicionar Paciente")
-        self.add_patient_button.setFixedWidth(150)
-        patient_layout = QHBoxLayout()
-        patient_layout.addWidget(self.patient_field)
-        patient_layout.addWidget(self.add_patient_button)
-        self.form_layout.addRow(QLabel("Paciente:"), patient_layout)
+        scheduling_layout = QHBoxLayout()
+        self.scheduling_combo_box = ComboBox(
+            model_class=Scheduling,
+            date=self.date_field.date().toPython(),
+        )
+        self.add_scheduling_button = QPushButton("Adicionar")
+        self.add_scheduling_button.clicked.connect(self._add_scheduling_to_table)
+        scheduling_layout.addWidget(self.scheduling_combo_box)
+        scheduling_layout.addWidget(self.add_scheduling_button)
+        layout.addRow(QLabel("Agendamento:"), scheduling_layout)
+        return layout
 
-        self.sensitive_patient_checkbox = QCheckBox("Paciente Sensível")
-        self.form_layout.addRow(QLabel(""), self.sensitive_patient_checkbox)
+    def _on_driver_changed(self, index: int) -> None:
+        driver = self.driver_combo_box.get_data()[index - 1]
+        if driver is not None:
+            vehicle = next(
+                (
+                    v
+                    for v in self.vehicle_combo_box.get_data()
+                    if v.default_driver_id == driver.id
+                ),
+                None,
+            )
+            if vehicle is not None:
+                self.vehicle_combo_box.setCurrentIndexByData(vehicle)
 
-        self.companions_widget = CompanionsGroupWidget()
-        self.form_layout.addWidget(self.companions_widget)
+    def _add_scheduling_to_table(self) -> None:
+        scheduling = self.scheduling_combo_box.get_current_data()
+        if scheduling is not None:
+            row_count = self.schedulings_table.rowCount()
+            self.schedulings_table.insertRow(row_count)
+            self.schedulings_table.setItem(
+                row_count, 0, QTableWidgetItem(str(scheduling.id))
+            )
+            self.schedulings_table.setItem(
+                row_count, 1, QTableWidgetItem(scheduling.get_description())
+            )
+            self._fill_schedulings_combo_box()
 
-        self.description_field = QTextEdit()
-        self.description_field.setFixedHeight(100)
-        self.form_layout.addRow(QLabel("Descrição:"), self.description_field)
+    def _fill_schedulings_combo_box(self) -> None:
+        self.scheduling_combo_box.fill(
+            date=self.date_field.date().toPython(),
+            ids_ignore=self._get_scheduling_ids_from_table(),
+        )
 
-        main_layout.addLayout(self.form_layout)
-        main_layout.addStretch(1)
+    def _get_scheduling_ids_from_table(self) -> List[int]:
+        scheduling_ids = []
+        for row in range(self.schedulings_table.rowCount()):
+            scheduling_id = self.schedulings_table.item(row, 0).data(Qt.DisplayRole)
+            if scheduling_id:
+                scheduling_ids.append(int(scheduling_id))
+        return scheduling_ids
 
-        return main_layout
+    def _create_scheduling_table_layout(self) -> QLayout:
+        scheduling_table_layout = QVBoxLayout()
+        self.schedulings_table = QTableWidget()
+        self.schedulings_table.setColumnCount(2)
+        self.schedulings_table.setHorizontalHeaderLabels(["ID", "Agendamento"])
+        self.schedulings_table.setColumnWidth(0, 1)
+        self.schedulings_table.horizontalHeader().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.Fixed
+        )
+        self.schedulings_table.horizontalHeader().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.Stretch
+        )
+        self.schedulings_table.setSelectionBehavior(
+            QAbstractItemView.SelectionBehavior.SelectRows
+        )
+        self.schedulings_table.setSelectionMode(
+            QAbstractItemView.SelectionMode.SingleSelection
+        )
+        self.schedulings_table.setEditTriggers(
+            QAbstractItemView.EditTrigger.NoEditTriggers
+        )
+        self.schedulings_table.itemSelectionChanged.connect(
+            self._on_scheduling_selection_changed
+        )
+        scheduling_table_layout.addWidget(self.schedulings_table)
 
-    def _focus_time_section(self, date):
-        self.datetime_field.setCurrentSection(QDateTimeEdit.HourSection)
-        self.datetime_field.setSelectedSection(QDateTimeEdit.HourSection)
+        self.remove_scheduling_button = QPushButton("Remover Agendamento Selecionado")
+        self.remove_scheduling_button.setFixedWidth(200)
+        self.remove_scheduling_button.clicked.connect(self._remove_selected_scheduling)
+        remove_scheduling_layout = QHBoxLayout()
+        remove_scheduling_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
+        remove_scheduling_layout.addWidget(self.remove_scheduling_button)
+        scheduling_table_layout.addLayout(remove_scheduling_layout)
 
-    def _on_patient_changed(self, patient: Optional[Patient]):
-        if patient is None:
-            self.form_layout.setRowVisible(self.sensitive_patient_checkbox, False)
-            self.sensitive_patient_checkbox.setChecked(False)
-            self.companions_widget.hide()
-            self.companions_widget.set_companions([])
-        else:
-            self.form_layout.setRowVisible(self.sensitive_patient_checkbox, True)
-            self.companions_widget.show()
+        return scheduling_table_layout
+
+    def _on_scheduling_selection_changed(self) -> None:
+        selected_rows = self.schedulings_table.selectedIndexes()
+        self.remove_scheduling_button.setEnabled(len(selected_rows) > 0)
+
+    def _remove_selected_scheduling(self) -> None:
+        selected_rows = self.schedulings_table.selectedIndexes()
+        if selected_rows:
+            self.schedulings_table.removeRow(selected_rows[0].row())
+            self._fill_schedulings_combo_box()
+
+    def _create_second_form_part_layout(self) -> QLayout:
+        layout = QFormLayout()
+        times_layout = QHBoxLayout()
+
+        self.departure_time_field = TimeEdit(step_minutes=15)
+        self.departure_time_field.setTimeRange(QTime(0, 0, 0), QTime(23, 59, 0))
+        self.departure_time_field.setDisplayFormat("HH:mm")
+        self.departure_time_field.setCurrentSection(TimeEdit.MinuteSection)
+        self.departure_time_field.setFixedWidth(50)
+        times_layout.addWidget(self.departure_time_field)
+
+        times_layout.addWidget(QLabel("Chegada:"))
+        self.arrival_time_field = TimeEdit(step_minutes=15)
+        self.arrival_time_field.setTimeRange(QTime(0, 0, 0), QTime(23, 59, 0))
+        self.arrival_time_field.setDisplayFormat("HH:mm")
+        self.arrival_time_field.setCurrentSection(TimeEdit.MinuteSection)
+        self.arrival_time_field.setFixedWidth(50)
+        times_layout.addWidget(self.arrival_time_field)
+
+        self.calculate_departure_arrival_button = QPushButton("Sugerir Horários")
+        times_layout.addWidget(self.calculate_departure_arrival_button)
+
+        layout.addRow(QLabel("Saída:"), times_layout)
+
+        self.creation_user_field = QLineEdit()
+        self.creation_user_field.setReadOnly(True)
+        layout.addRow(QLabel("Usuário que criou:"), self.creation_user_field)
+
+        return layout

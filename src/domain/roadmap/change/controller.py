@@ -1,149 +1,114 @@
-from typing import Any, Dict, Optional, Type
+from datetime import datetime
+from typing import Optional, Type
 
-from PySide6.QtCore import QDate, QDateTime, QTime
 from sqlalchemy.orm import Session
 
 from common.controller.base_change_controller import BaseChangeController
 from common.controller.base_entity_controller import ModelType
-from common.controller.base_list_controller import BaseListController
 from common.gui.widget.base_change_widget import BaseChangeWidget
 from db import Database
-from domain.companion.model import Companion
-from domain.location.add.controller import LocationAddController
-from domain.location.model import Location
-from domain.patient.add.controller import PatientAddController
-from domain.patient.model import Patient
-from domain.scheduling.change.widget import SchedulingChangeWidget
+from domain.roadmap.change.widget import RoadmapChangeWidget
+from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
+from settings import Settings
 
 
-class SchedulingChangeController(BaseChangeController[Scheduling]):
-    _widget: SchedulingChangeWidget
+class RoadmapChangeController(BaseChangeController[Roadmap]):
+    _widget: RoadmapChangeWidget
 
-    def __init__(
-        self, entity: Scheduling, caller: BaseListController | None = None
-    ) -> None:
-        super().__init__(entity, caller)
-        self._last_add_action: Optional[str] = None
-
-    def _populate_form(self, entity: Scheduling) -> None:
-        self._widget.datetime_field.setDateTime(
-            QDateTime(
-                QDate(entity.datetime.year, entity.datetime.month, entity.datetime.day),
-                QTime(
-                    entity.datetime.hour, entity.datetime.minute, entity.datetime.second
-                ),
-            )
-        )
-        self._widget.average_duration_field.setTime(
-            QTime(
-                entity.average_duration.hour,
-                entity.average_duration.minute,
-                entity.average_duration.second,
-            )
-        )
-        self._widget.patient_field.set_selected_model(entity.patient)
-        self._widget.location_field.set_selected_model(entity.location)
-        self._widget.purpose_field.setCurrentIndexByData(entity.purpose)
-        self._widget.sensitive_patient_checkbox.setChecked(
-            bool(entity.sensitive_patient)
-        )
-        self._widget.description_field.setText(entity.description)
-        self._widget.companions_widget.set_companions(entity.companions)
-
-    def _get_model_updates(self) -> Optional[Dict[str, Any]]:
-        location = self._widget.location_field.get_selected_model()
-        if not location:
-            self._widget.show_info_pop_up("Atenção", "Selecione uma localização")
+    def _get_populated_model(self) -> Optional[Roadmap]:
+        driver = self._widget.driver_combo_box.get_current_data()
+        if not driver:
+            self._widget.show_info_pop_up("Atenção", "Selecione um motorista")
             return None
 
-        patient = self._widget.patient_field.get_selected_model()
-
-        purpose = self._widget.purpose_field.get_current_data()
-        if not purpose:
-            self._widget.show_info_pop_up("Atenção", "Selecione uma finalidade")
+        vehicle = self._widget.vehicle_combo_box.get_current_data()
+        if not vehicle:
+            self._widget.show_info_pop_up("Atenção", "Selecione um veículo")
             return None
 
-        return {
-            "datetime": self._widget.datetime_field.dateTime()
-            .toPython()
-            .replace(second=0, microsecond=0),
-            "average_duration": self._widget.average_duration_field.time().toPython(),
-            "sensitive_patient": (
-                self._widget.sensitive_patient_checkbox.isChecked() if patient else None
-            ),
-            "description": self._widget.description_field.toPlainText().strip(),
-            "location_id": location.id,
-            "purpose_id": purpose.id,
-            "patient_id": patient.id if patient else None,
-        }
+        date = self._widget.date_field.dateTime().toPython()
+        if date <= datetime.now().date():
+            self._widget.show_info_pop_up(
+                "Atenção", "A data tem que ser maior que a hoje"
+            )
+            return None
 
-    def _change(self) -> bool:
+        departure_time = self._widget.departure_time_field.time()
+        arrival_time = self._widget.arrival_time_field.time()
+        if departure_time >= arrival_time:
+            self._widget.show_info_pop_up(
+                "Atenção", "A hora de partida tem que ser menor que a hora de chegada"
+            )
+            return None
+
+        return Roadmap(
+            driver_id=driver.id,
+            vehicle_id=vehicle.id,
+            departure=datetime.combine(date, departure_time),
+            arrival=datetime.combine(date, arrival_time),
+            creation_user_id=Settings.get_logged_user().id,
+        )
+
+    def _save(self) -> bool:
         with Database.session_scope() as session:
             try:
-                if updates := self._get_model_updates():
-                    scheduling = Scheduling.get_by_id(self._entity_id, session=session)
-                    scheduling.update(session=session, **updates)
-                    self._update_companions(session)
-                    session.commit()
+                if model := self._get_populated_model():
+                    model.save(session)
+                    session.flush()
+                    self.save_schedulings(model, session)
                     self._widget.show_info_pop_up(
                         "Sucesso",
-                        f"{self._model_class.get_static_description()} alterado(a) com sucesso",
+                        f"{self._model_class.get_static_description()} criado(a) com sucesso",
                     )
                     self._widget.close()
                     return True
+            except ValueError as e:
+                self._widget.show_info_pop_up("Atenção", str(e))
+                session.rollback()
+                return False
             except Exception as e:
-                self._handle_change_exception(e)
+                self._handle_add_exception(e)
                 session.rollback()
                 return False
 
-    def _update_companions(self, session: Session) -> None:
-        companion_ids = []
-        for companion in self._widget.companions_widget.get_companions():
-            if companion.id is None:
-                companion.scheduling_id = self._entity_id
-                companion.save(session)
-                session.flush()
-            else:
-                Companion.get_by_id(companion.id, session=session).update(
-                    session=session,
-                    name=companion.name,
-                    cpf=companion.cpf,
-                    phone=companion.phone,
-                )
-            companion_ids.append(companion.id)
-        session.query(Companion).filter(
-            Companion.scheduling_id == self._entity_id,
-            Companion.id.notin_(companion_ids),
-        ).delete()
+    def save_schedulings(self, roadmap: Roadmap, session: Session) -> None:
+        scheduling_ids = self._widget._get_scheduling_ids_from_table()
+
+        if not scheduling_ids:
+            raise ValueError("Adicione pelo menos um agendamento")
+
+        total_passangers = 0
+        schedulings = (
+            session.query(Scheduling).filter(Scheduling.id.in_(scheduling_ids)).all()
+        )
+        for scheduling in schedulings:
+            total_passangers += scheduling.get_passenger_count()
+
+        if total_passangers > roadmap.vehicle.capacity:
+            raise ValueError(
+                f"O veículo não tem capacidade para transportar todos {total_passangers} passageiros"
+            )
+
+        for scheduling in schedulings:
+            scheduling.roadmap_id = roadmap.id
+            scheduling.save(session)
 
     def _get_widget_instance(self) -> BaseChangeWidget:
-        return SchedulingChangeWidget()
+        return RoadmapChangeWidget()
 
     def _get_model_class(self) -> Type[ModelType]:
-        return Scheduling
+        return Roadmap
 
     def show(self) -> None:
-        self._widget.add_patient_button.clicked.connect(self._on_add_patient_clicked)
-        self._widget.add_location_button.clicked.connect(self._on_add_location_clicked)
+        self._widget.calculate_departure_arrival_button.clicked.connect(
+            self._on_calculate_departure_arrival_clicked
+        )
+        self._widget.scheduling_combo_box.fill(
+            date=self._widget.date_field.date().toPython(),
+            ids_ignore=self._widget._get_scheduling_ids_from_table(),
+        )
         super().show()
 
-    def _on_add_patient_clicked(self) -> None:
-        self._patient_add_controller = PatientAddController(self)
-        self._last_add_action = "patient"
-        self._patient_add_controller.show()
-
-    def _on_add_location_clicked(self) -> None:
-        self._location_add_controller = LocationAddController(self)
-        self._last_add_action = "location"
-        self._location_add_controller.show()
-
-    def callee_finalized(self) -> None:
-        if self._last_add_action == "patient":
-            self._widget.patient_field.set_selected_model(
-                Patient.query().order_by(Patient.id.desc()).first()
-            )
-        elif self._last_add_action == "location":
-            self._widget.location_field.set_selected_model(
-                Location.query().order_by(Location.id.desc()).first()
-            )
+    def _on_calculate_departure_arrival_clicked(self) -> None:
+        pass

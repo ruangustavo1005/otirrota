@@ -1,6 +1,7 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QCheckBox, QHBoxLayout, QLabel, QLineEdit
+from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit
 
+from common.gui.field.boolean_combo_box import BooleanComboBox
 from common.gui.field.license_plate_line_edit import LicensePlateLineEdit
 from common.gui.widget.base_list_widget import BaseListWidget
 from domain.vehicle.model import Vehicle
@@ -48,8 +49,10 @@ class VehicleListWidget(BaseListWidget[Vehicle]):
         active_label.setFixedWidth(40)
         filter_area_layout.addWidget(active_label)
 
-        self.active_filter = QCheckBox()
-        self.active_filter.setChecked(True)
+        self.active_filter = BooleanComboBox()
+        self.active_filter.setCurrentIndexByData(True)
+        self.active_filter.setFixedWidth(100)
+        self.active_filter.currentIndexChanged.connect(self.update_button.click)
         filter_area_layout.addWidget(self.active_filter)
 
     def _create_actions_area(self) -> QHBoxLayout:

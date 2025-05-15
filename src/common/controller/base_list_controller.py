@@ -62,7 +62,7 @@ class BaseListController(BaseEntityController[ModelType], Generic[ModelType]):
         indexes = selected.indexes()
         if indexes:
             self._selected_row = indexes[0].row()
-            self._selected_data = [index.data() for index in indexes]
+            self._selected_data = indexes[0].data()
             self._selected_model = self._widget.table_model.get_original_object(
                 self._selected_row
             )
