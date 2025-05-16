@@ -2,15 +2,18 @@ from datetime import datetime
 from typing import Any, List, Tuple, Type
 
 from dateutil.relativedelta import relativedelta
+from PySide6.QtCore import QItemSelection
 from sqlalchemy import Select
 
 from common.controller.base_controller import BaseController
 from common.controller.base_entity_controller import ModelType
 from common.controller.base_list_controller import BaseListController
 from domain.roadmap.add.controller import RoadmapAddController
+from domain.roadmap.change.controller import RoadmapChangeController
 from domain.roadmap.list.widget import RoadmapDateTypeFilterEnum, RoadmapListWidget
 from domain.roadmap.model import Roadmap
 from domain.roadmap.remove.controller import RoadmapRemoveController
+from domain.roadmap.view.controller import RoadmapViewController
 
 
 class RoadmapListController(BaseListController[Roadmap]):
@@ -61,28 +64,30 @@ class RoadmapListController(BaseListController[Roadmap]):
     def _set_widget_connections(self) -> None:
         super()._set_widget_connections()
         self._widget.add_button.clicked.connect(self.__add_button_clicked)
-        # self._widget.change_button.clicked.connect(self.__change_button_clicked)
+        self._widget.change_button.clicked.connect(self.__change_button_clicked)
         self._widget.remove_button.clicked.connect(self.__remove_button_clicked)
-        # self._widget.view_button.clicked.connect(self.__view_button_clicked)
+        self._widget.view_button.clicked.connect(self.__view_button_clicked)
 
     def __add_button_clicked(self) -> None:
         self.add_controller = RoadmapAddController(self)
         self.add_controller.show()
 
-    # def __change_button_clicked(self) -> None:
-    #     self.change_controller = SchedulingChangeController(self._selected_model, self)
-    #     self.change_controller.show()
+    def __change_button_clicked(self) -> None:
+        self.change_controller = RoadmapChangeController(self._selected_model, self)
+        self.change_controller.show()
 
     def __remove_button_clicked(self) -> None:
         self.remove_controller = RoadmapRemoveController(self._selected_model, self)
         self.remove_controller.show()
 
-    # def __view_button_clicked(self) -> None:
-    #     self.view_controller = SchedulingViewController(self._selected_model, self)
-    #     self.view_controller.show()
+    def __view_button_clicked(self) -> None:
+        self.view_controller = RoadmapViewController(self._selected_model, self)
+        self.view_controller.show()
 
-    def _on_table_selection_changed(self) -> None:
-        super()._on_table_selection_changed()
+    def _on_table_selection_changed(
+        self, selected: QItemSelection, deselected: QItemSelection
+    ) -> None:
+        super()._on_table_selection_changed(selected, deselected)
         if (
             self._selected_model
             and self._selected_model.departure.date() < datetime.now().date()

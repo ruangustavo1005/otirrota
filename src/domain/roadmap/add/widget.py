@@ -5,7 +5,9 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QApplication,
     QDateEdit,
+    QFrame,
     QFormLayout,
+    QGroupBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -30,7 +32,7 @@ class RoadmapAddWidget(BaseAddWidget):
         super().__init__(
             model_class=Roadmap,
             width=650,
-            height=650,
+            height=750,
             parent=parent,
         )
         qApp = QApplication.instance()
@@ -60,7 +62,7 @@ class RoadmapAddWidget(BaseAddWidget):
         layout = QVBoxLayout()
 
         layout.addLayout(self._create_first_form_part_layout())
-        layout.addLayout(self._create_scheduling_table_layout())
+        layout.addWidget(self._create_scheduling_table_group_box())
         layout.addLayout(self._create_second_form_part_layout())
 
         return layout
@@ -88,13 +90,6 @@ class RoadmapAddWidget(BaseAddWidget):
         self.vehicle_combo_box = ComboBox(model_class=Vehicle)
         layout.addRow(QLabel("Veículo:"), self.vehicle_combo_box)
 
-        scheduling_layout = QHBoxLayout()
-        self.scheduling_combo_box = ComboBox(model_class=Scheduling, load=False)
-        self.add_scheduling_button = QPushButton("Adicionar")
-        self.add_scheduling_button.clicked.connect(self._add_scheduling_to_table)
-        scheduling_layout.addWidget(self.scheduling_combo_box)
-        scheduling_layout.addWidget(self.add_scheduling_button)
-        layout.addRow(QLabel("Agendamento:"), scheduling_layout)
         return layout
 
     def _on_driver_changed(self, index: int) -> None:
@@ -138,8 +133,33 @@ class RoadmapAddWidget(BaseAddWidget):
                 scheduling_ids.append(int(scheduling_id))
         return scheduling_ids
 
-    def _create_scheduling_table_layout(self) -> QLayout:
+    def _create_scheduling_table_group_box(self) -> QGroupBox:
         scheduling_table_layout = QVBoxLayout()
+
+        scheduling_combo_box_layout = QHBoxLayout()
+        self.scheduling_combo_box = ComboBox(model_class=Scheduling, load=False)
+        self.scheduling_combo_box.currentIndexChanged.connect(
+            self._on_scheduling_combo_box_changed
+        )
+        scheduling_combo_box_label = QLabel("Selecione um agendamento:")
+        scheduling_combo_box_label.setFixedWidth(160)
+        scheduling_combo_box_layout.addWidget(scheduling_combo_box_label)
+        scheduling_combo_box_layout.addWidget(self.scheduling_combo_box)
+        scheduling_table_layout.addLayout(scheduling_combo_box_layout)
+
+        scheduling_buttons_layout = QHBoxLayout()
+        self._view_scheduling_button = QPushButton("Visualizar Agendamento")
+        self.add_scheduling_button = QPushButton("Adicionar Agendamento ao Roteiro")
+        self.add_scheduling_button.clicked.connect(self._add_scheduling_to_table)
+        scheduling_buttons_layout.addWidget(self._view_scheduling_button)
+        scheduling_buttons_layout.addWidget(self.add_scheduling_button)
+        scheduling_table_layout.addLayout(scheduling_buttons_layout)
+
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        scheduling_table_layout.addWidget(line)
+
         self.schedulings_table = QTableWidget()
         self.schedulings_table.setColumnCount(2)
         self.schedulings_table.setHorizontalHeaderLabels(["ID", "Agendamento"])
@@ -173,7 +193,18 @@ class RoadmapAddWidget(BaseAddWidget):
         remove_scheduling_layout.addWidget(self.remove_scheduling_button)
         scheduling_table_layout.addLayout(remove_scheduling_layout)
 
-        return scheduling_table_layout
+        group_box = QGroupBox("Agendamentos")
+        group_box.setLayout(scheduling_table_layout)
+
+        return group_box
+
+    def _on_scheduling_combo_box_changed(self) -> None:
+        if self.scheduling_combo_box.get_current_data() is not None:
+            self._view_scheduling_button.setEnabled(True)
+            self.add_scheduling_button.setEnabled(True)
+        else:
+            self._view_scheduling_button.setEnabled(False)
+            self.add_scheduling_button.setEnabled(False)
 
     def _on_scheduling_selection_changed(self) -> None:
         selected_rows = self.schedulings_table.selectedIndexes()

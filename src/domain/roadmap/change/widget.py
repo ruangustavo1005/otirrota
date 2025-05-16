@@ -6,6 +6,8 @@ from PySide6.QtWidgets import (
     QApplication,
     QDateEdit,
     QFormLayout,
+    QFrame,
+    QGroupBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -27,11 +29,12 @@ from domain.vehicle.model import Vehicle
 
 
 class RoadmapChangeWidget(BaseChangeWidget):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, roadmap_id: int = None):
+        self.roadmap_id = roadmap_id
         super().__init__(
             model_class=Roadmap,
             width=650,
-            height=650,
+            height=750,
             parent=parent,
         )
         qApp = QApplication.instance()
@@ -61,7 +64,7 @@ class RoadmapChangeWidget(BaseChangeWidget):
         layout = QVBoxLayout()
 
         layout.addLayout(self._create_first_form_part_layout())
-        layout.addLayout(self._create_scheduling_table_layout())
+        layout.addWidget(self._create_scheduling_table_group_box())
         layout.addLayout(self._create_second_form_part_layout())
 
         return layout
@@ -73,7 +76,7 @@ class RoadmapChangeWidget(BaseChangeWidget):
         self.date_field.setCalendarPopup(True)
         self.date_field.setDisplayFormat("dd/MM/yyyy")
         self.date_field.setFixedWidth(100)
-        self.date_field.dateChanged.connect(self._fill_schedulings_combo_box)
+        self.date_field.setDisabled(True)
         layout.addRow(QLabel("Data:"), self.date_field)
 
         self.driver_combo_box = ComboBox(model_class=Driver)
@@ -83,16 +86,6 @@ class RoadmapChangeWidget(BaseChangeWidget):
         self.vehicle_combo_box = ComboBox(model_class=Vehicle)
         layout.addRow(QLabel("Veículo:"), self.vehicle_combo_box)
 
-        scheduling_layout = QHBoxLayout()
-        self.scheduling_combo_box = ComboBox(
-            model_class=Scheduling,
-            date=self.date_field.date().toPython(),
-        )
-        self.add_scheduling_button = QPushButton("Adicionar")
-        self.add_scheduling_button.clicked.connect(self._add_scheduling_to_table)
-        scheduling_layout.addWidget(self.scheduling_combo_box)
-        scheduling_layout.addWidget(self.add_scheduling_button)
-        layout.addRow(QLabel("Agendamento:"), scheduling_layout)
         return layout
 
     def _on_driver_changed(self, index: int) -> None:
@@ -124,6 +117,7 @@ class RoadmapChangeWidget(BaseChangeWidget):
 
     def _fill_schedulings_combo_box(self) -> None:
         self.scheduling_combo_box.fill(
+            roadmap_id=self.roadmap_id,
             date=self.date_field.date().toPython(),
             ids_ignore=self._get_scheduling_ids_from_table(),
         )
@@ -131,13 +125,40 @@ class RoadmapChangeWidget(BaseChangeWidget):
     def _get_scheduling_ids_from_table(self) -> List[int]:
         scheduling_ids = []
         for row in range(self.schedulings_table.rowCount()):
-            scheduling_id = self.schedulings_table.item(row, 0).data(Qt.DisplayRole)
-            if scheduling_id:
-                scheduling_ids.append(int(scheduling_id))
+            cell = self.schedulings_table.item(row, 0)
+            if cell:
+                scheduling_id = cell.data(Qt.DisplayRole)
+                if scheduling_id:
+                    scheduling_ids.append(int(scheduling_id))
         return scheduling_ids
 
-    def _create_scheduling_table_layout(self) -> QLayout:
+    def _create_scheduling_table_group_box(self) -> QGroupBox:
         scheduling_table_layout = QVBoxLayout()
+
+        scheduling_combo_box_layout = QHBoxLayout()
+        self.scheduling_combo_box = ComboBox(model_class=Scheduling, load=False)
+        self.scheduling_combo_box.currentIndexChanged.connect(
+            self._on_scheduling_combo_box_changed
+        )
+        scheduling_combo_box_label = QLabel("Selecione um agendamento:")
+        scheduling_combo_box_label.setFixedWidth(160)
+        scheduling_combo_box_layout.addWidget(scheduling_combo_box_label)
+        scheduling_combo_box_layout.addWidget(self.scheduling_combo_box)
+        scheduling_table_layout.addLayout(scheduling_combo_box_layout)
+
+        scheduling_buttons_layout = QHBoxLayout()
+        self._view_scheduling_button = QPushButton("Visualizar Agendamento")
+        self.add_scheduling_button = QPushButton("Adicionar Agendamento ao Roteiro")
+        self.add_scheduling_button.clicked.connect(self._add_scheduling_to_table)
+        scheduling_buttons_layout.addWidget(self._view_scheduling_button)
+        scheduling_buttons_layout.addWidget(self.add_scheduling_button)
+        scheduling_table_layout.addLayout(scheduling_buttons_layout)
+
+        line = QFrame()
+        line.setFrameShape(QFrame.HLine)
+        line.setFrameShadow(QFrame.Sunken)
+        scheduling_table_layout.addWidget(line)
+
         self.schedulings_table = QTableWidget()
         self.schedulings_table.setColumnCount(2)
         self.schedulings_table.setHorizontalHeaderLabels(["ID", "Agendamento"])
@@ -170,7 +191,18 @@ class RoadmapChangeWidget(BaseChangeWidget):
         remove_scheduling_layout.addWidget(self.remove_scheduling_button)
         scheduling_table_layout.addLayout(remove_scheduling_layout)
 
-        return scheduling_table_layout
+        group_box = QGroupBox("Agendamentos")
+        group_box.setLayout(scheduling_table_layout)
+
+        return group_box
+
+    def _on_scheduling_combo_box_changed(self) -> None:
+        if self.scheduling_combo_box.get_current_data() is not None:
+            self._view_scheduling_button.setEnabled(True)
+            self.add_scheduling_button.setEnabled(True)
+        else:
+            self._view_scheduling_button.setEnabled(False)
+            self.add_scheduling_button.setEnabled(False)
 
     def _on_scheduling_selection_changed(self) -> None:
         selected_rows = self.schedulings_table.selectedIndexes()

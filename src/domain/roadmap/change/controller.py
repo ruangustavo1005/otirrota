@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Optional, Type
 
+from PySide6.QtCore import QDate, QTime
+from PySide6.QtWidgets import QTableWidgetItem
 from sqlalchemy.orm import Session
 
 from common.controller.base_change_controller import BaseChangeController
@@ -10,13 +12,49 @@ from db import Database
 from domain.roadmap.change.widget import RoadmapChangeWidget
 from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
+from domain.scheduling.view.controller import SchedulingViewController
 from settings import Settings
 
 
 class RoadmapChangeController(BaseChangeController[Roadmap]):
     _widget: RoadmapChangeWidget
 
-    def _get_populated_model(self) -> Optional[Roadmap]:
+    def _populate_form(self, entity: Roadmap) -> None:
+        self._widget.date_field.setDate(
+            QDate(
+                entity.departure.year,
+                entity.departure.month,
+                entity.departure.day,
+            )
+        )
+        self._widget.driver_combo_box.setCurrentIndexByData(entity.driver)
+        self._widget.vehicle_combo_box.setCurrentIndexByData(entity.vehicle)
+        for scheduling in entity.schedulings:
+            row_count = self._widget.schedulings_table.rowCount()
+            self._widget.schedulings_table.insertRow(row_count)
+            self._widget.schedulings_table.setItem(
+                row_count, 0, QTableWidgetItem(str(scheduling.id))
+            )
+            self._widget.schedulings_table.setItem(
+                row_count, 1, QTableWidgetItem(scheduling.get_description())
+            )
+        self._widget.departure_time_field.setTime(
+            QTime(
+                entity.departure.hour,
+                entity.departure.minute,
+            )
+        )
+        self._widget.arrival_time_field.setTime(
+            QTime(
+                entity.arrival.hour,
+                entity.arrival.minute,
+            )
+        )
+        self._widget.creation_user_field.setText(
+            entity.creation_user.get_combo_box_description()
+        )
+
+    def _get_model_updates(self) -> Optional[Roadmap]:
         driver = self._widget.driver_combo_box.get_current_data()
         if not driver:
             self._widget.show_info_pop_up("Atenção", "Selecione um motorista")
@@ -27,21 +65,15 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
             self._widget.show_info_pop_up("Atenção", "Selecione um veículo")
             return None
 
-        date = self._widget.date_field.dateTime().toPython()
-        if date <= datetime.now().date():
-            self._widget.show_info_pop_up(
-                "Atenção", "A data tem que ser maior que a hoje"
-            )
-            return None
-
-        departure_time = self._widget.departure_time_field.time()
-        arrival_time = self._widget.arrival_time_field.time()
+        departure_time = self._widget.departure_time_field.time().toPython()
+        arrival_time = self._widget.arrival_time_field.time().toPython()
         if departure_time >= arrival_time:
             self._widget.show_info_pop_up(
                 "Atenção", "A hora de partida tem que ser menor que a hora de chegada"
             )
             return None
 
+        date = self._widget.date_field.date().toPython()
         return Roadmap(
             driver_id=driver.id,
             vehicle_id=vehicle.id,
@@ -50,16 +82,18 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
             creation_user_id=Settings.get_logged_user().id,
         )
 
-    def _save(self) -> bool:
+    def _change(self) -> bool:
         with Database.session_scope() as session:
             try:
-                if model := self._get_populated_model():
-                    model.save(session)
-                    session.flush()
-                    self.save_schedulings(model, session)
+                if updates := self._get_model_updates():
+                    entity = self._model_class.get_by_id(
+                        self._entity_id, session=session
+                    )
+                    entity.update(session=session, **updates)
+                    self.update_schedulings(entity, session)
                     self._widget.show_info_pop_up(
                         "Sucesso",
-                        f"{self._model_class.get_static_description()} criado(a) com sucesso",
+                        f"{self._model_class.get_static_description()} alterado(a) com sucesso",
                     )
                     self._widget.close()
                     return True
@@ -68,11 +102,10 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
                 session.rollback()
                 return False
             except Exception as e:
-                self._handle_add_exception(e)
-                session.rollback()
+                self._handle_change_exception(e)
                 return False
 
-    def save_schedulings(self, roadmap: Roadmap, session: Session) -> None:
+    def update_schedulings(self, roadmap: Roadmap, session: Session) -> None:
         scheduling_ids = self._widget._get_scheduling_ids_from_table()
 
         if not scheduling_ids:
@@ -90,17 +123,33 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
                 f"O veículo não tem capacidade para transportar todos {total_passangers} passageiros"
             )
 
-        for scheduling in schedulings:
-            scheduling.roadmap_id = roadmap.id
+        removed_schedulings = (
+            session.query(Scheduling).filter(
+                Scheduling.roadmap_id == roadmap.id,
+                Scheduling.id.notin_(scheduling_ids),
+            ).all()
+        )
+        existent_scheduling_ids = []
+        for scheduling in removed_schedulings:
+            scheduling.roadmap_id = None
             scheduling.save(session)
+            existent_scheduling_ids.append(scheduling.id)
+
+        for scheduling in schedulings:
+            if scheduling.id not in existent_scheduling_ids:
+                scheduling.roadmap_id = roadmap.id
+                scheduling.save(session)
 
     def _get_widget_instance(self) -> BaseChangeWidget:
-        return RoadmapChangeWidget()
+        return RoadmapChangeWidget(roadmap_id=self._entity_id)
 
     def _get_model_class(self) -> Type[ModelType]:
         return Roadmap
 
     def show(self) -> None:
+        self._widget._view_scheduling_button.clicked.connect(
+            self._on_view_scheduling_clicked
+        )
         self._widget.calculate_departure_arrival_button.clicked.connect(
             self._on_calculate_departure_arrival_clicked
         )
@@ -109,6 +158,12 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
             ids_ignore=self._widget._get_scheduling_ids_from_table(),
         )
         super().show()
+
+    def _on_view_scheduling_clicked(self) -> None:
+        self._scheduling_view_controller = SchedulingViewController(
+            self._widget.scheduling_combo_box.get_current_data()
+        )
+        self._scheduling_view_controller.show()
 
     def _on_calculate_departure_arrival_clicked(self) -> None:
         pass

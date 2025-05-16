@@ -92,6 +92,11 @@ class Roadmap(BaseModel):
                 type_=Time,
                 info={"title": "Chegada"},
             ),
+            Column(
+                name="passenger_count",
+                type_=Integer,
+                info={"title": "Qtd. Passageiros"},
+            ),
         ]
 
     def get_description(self) -> str:

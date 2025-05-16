@@ -4,7 +4,7 @@ from datetime import datetime, time  # noqa: F401
 from typing import TYPE_CHECKING, Any, List, Optional
 
 from dateutil.relativedelta import relativedelta
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Time
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Time, or_
 from sqlalchemy.orm import Mapped, relationship
 
 from common.model.base_model import BaseModel
@@ -88,9 +88,18 @@ class Scheduling(BaseModel):
         return self.roadmap is not None
 
     @classmethod
-    def list_for_combo_box(cls, **kwargs: Any) -> List[Scheduling]:
-        date = kwargs.get("date")
-        ids_ignore = kwargs.get("ids_ignore", [])
+    def list_for_combo_box(
+        cls,
+        roadmap_id: int = None,
+        date: datetime = None,
+        ids_ignore: List[int] = None,
+        **kwargs: Any,
+    ) -> List[Scheduling]:
+        if roadmap_id:
+            query = cls.query().filter(or_(cls.roadmap_id.is_(None), cls.roadmap_id == roadmap_id))
+        else:
+            query = cls.query().filter(cls.roadmap_id.is_(None))
+
         if date:
             start_datetime = datetime(
                 year=date.year,
@@ -102,15 +111,14 @@ class Scheduling(BaseModel):
             )
             end_datetime = start_datetime + relativedelta(days=1)
             query = (
-                cls.query()
-                .filter(cls.datetime >= start_datetime)
+                query.filter(cls.datetime >= start_datetime)
                 .filter(cls.datetime <= end_datetime)
                 .order_by(cls.id)
             )
             if ids_ignore:
                 query = query.filter(cls.id.notin_(ids_ignore))
-            return [record for record in query]
-        return super().list_for_combo_box(**kwargs)
+
+        return [record for record in query.order_by(cls.datetime)]
 
     def format_for_table(self) -> List[Any]:
         result = super().format_for_table()

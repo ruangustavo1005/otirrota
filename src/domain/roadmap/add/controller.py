@@ -10,6 +10,7 @@ from db import Database
 from domain.roadmap.add.widget import RoadmapAddWidget
 from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
+from domain.scheduling.view.controller import SchedulingViewController
 from settings import Settings
 
 
@@ -55,7 +56,6 @@ class RoadmapAddController(BaseAddController[Roadmap]):
             try:
                 if model := self._get_populated_model():
                     model.save(session)
-                    session.flush()
                     self.save_schedulings(model, session)
                     self._widget.show_info_pop_up(
                         "Sucesso",
@@ -101,6 +101,9 @@ class RoadmapAddController(BaseAddController[Roadmap]):
         return Roadmap
 
     def show(self) -> None:
+        self._widget._view_scheduling_button.clicked.connect(
+            self._on_view_scheduling_clicked
+        )
         self._widget.calculate_departure_arrival_button.clicked.connect(
             self._on_calculate_departure_arrival_clicked
         )
@@ -108,6 +111,12 @@ class RoadmapAddController(BaseAddController[Roadmap]):
             date=self._widget.date_field.date().toPython(),
         )
         super().show()
+
+    def _on_view_scheduling_clicked(self) -> None:
+        self._scheduling_view_controller = SchedulingViewController(
+            self._widget.scheduling_combo_box.get_current_data()
+        )
+        self._scheduling_view_controller.show()
 
     def _on_calculate_departure_arrival_clicked(self) -> None:
         pass
