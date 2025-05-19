@@ -98,9 +98,6 @@ class SchedulingListController(BaseListController[Scheduling]):
         self, selected: QItemSelection, deselected: QItemSelection
     ) -> None:
         super()._on_table_selection_changed(selected, deselected)
-        if (
-            self._selected_model
-            and self._selected_model.roadmap
-        ):
+        if self._selected_model and self._selected_model.roadmap:
             self._widget.change_button.setDisabled(True)
             self._widget.remove_button.setDisabled(True)

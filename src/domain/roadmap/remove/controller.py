@@ -15,7 +15,7 @@ class RoadmapRemoveController(BaseRemoveController[Roadmap]):
         if self._entity.departure.date() < date.today():
             BaseWidget.show_warning_pop_up(
                 "Atenção",
-                f"Não é possível excluir um Roteiro que já ocorreu",
+                "Não é possível excluir um Roteiro que já ocorreu",
             )
             return False
         return super()._remove()

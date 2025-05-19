@@ -96,7 +96,9 @@ class Scheduling(BaseModel):
         **kwargs: Any,
     ) -> List[Scheduling]:
         if roadmap_id:
-            query = cls.query().filter(or_(cls.roadmap_id.is_(None), cls.roadmap_id == roadmap_id))
+            query = cls.query().filter(
+                or_(cls.roadmap_id.is_(None), cls.roadmap_id == roadmap_id)
+            )
         else:
             query = cls.query().filter(cls.roadmap_id.is_(None))
 

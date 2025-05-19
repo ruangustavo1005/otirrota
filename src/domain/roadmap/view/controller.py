@@ -2,6 +2,7 @@ from typing import Type
 
 from PySide6.QtCore import QDate, QTime
 from PySide6.QtWidgets import QTableWidgetItem
+
 from common.controller.base_entity_controller import ModelType
 from common.controller.base_view_controller import BaseViewController
 from common.gui.widget.base_view_widget import BaseViewWidget

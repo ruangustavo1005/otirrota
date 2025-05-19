@@ -131,10 +131,12 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
             )
 
         removed_schedulings = (
-            session.query(Scheduling).filter(
+            session.query(Scheduling)
+            .filter(
                 Scheduling.roadmap_id == roadmap.id,
                 Scheduling.id.notin_(scheduling_ids),
-            ).all()
+            )
+            .all()
         )
         existent_scheduling_ids = []
         for scheduling in removed_schedulings:

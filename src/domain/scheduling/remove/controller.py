@@ -4,7 +4,7 @@ from common.controller.base_entity_controller import ModelType
 from common.controller.base_remove_controller import BaseRemoveController
 from common.gui.widget.base_widget import BaseWidget
 from domain.scheduling.model import Scheduling
-from sqlalchemy.exc import IntegrityError
+
 
 class SchedulingRemoveController(BaseRemoveController[Scheduling]):
     def _get_model_class(self) -> Type[ModelType]:
