@@ -32,7 +32,9 @@ class DriverListController(BaseListController[Driver]):
                     f"%{self._widget.registration_number_filter.text()}%"
                 )
             )
-        filters.append(Driver.active == self._widget.active_filter.isChecked())
+        active_filter = self._widget.active_filter.get_current_data()
+        if active_filter is not None:
+            filters.append(Driver.active == active_filter)
         return filters
 
     def _set_widget_connections(self) -> None:

@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from contextlib import contextmanager
-from datetime import datetime, time
+from datetime import date, datetime, time
 from typing import Any, Dict, Generator, List, Optional, Type, TypeVar
 
 from sqlalchemy import Column, DateTime, Integer, Select
@@ -101,22 +101,20 @@ class BaseModel(Base):
         values_dict = {}
 
         for column in self._get_all_listable_columns():
-            value = getattr(self, column.name)
+            value = None
 
-            if isinstance(value, datetime):
-                value = value.strftime("%d/%m/%Y %H:%M")
-            elif isinstance(value, time):
-                value = value.strftime("%H:%M")
-            elif isinstance(value, float):
-                value = NumberUtils.float_to_str(value)
-            elif isinstance(value, bool):
-                value = "Sim" if value else "Não"
-            elif isinstance(value, int):
-                value = str(value)
-            elif isinstance(value, BaseModel):
-                value = value.get_description()
+            column_name = column.name
+            if len(column.foreign_keys) > 0:
+                column_name = list(column.foreign_keys)[0].target_fullname.split(".")[0]
 
-            values_dict[column.name] = value
+            if hasattr(self, column_name):
+                value = getattr(self, column_name)
+            elif hasattr(self, f"get_{column_name}") and callable(
+                getattr(self, f"get_{column_name}")
+            ):
+                value = getattr(self, f"get_{column_name}")()
+
+            values_dict[column_name] = self.format_value_for_table(value)
 
         result = []
 
@@ -125,8 +123,12 @@ class BaseModel(Base):
             del values_dict["id"]
 
         for column in self._get_all_listable_columns():
-            if column.name not in ["id", "created_at", "updated_at"]:
-                result.append(values_dict[column.name])
+            column_name = column.name
+            if len(column.foreign_keys) > 0:
+                column_name = list(column.foreign_keys)[0].target_fullname.split(".")[0]
+
+            if column_name not in ["id", "created_at", "updated_at"]:
+                result.append(values_dict[column_name])
 
         if "created_at" in values_dict:
             result.append(values_dict["created_at"])
@@ -134,6 +136,23 @@ class BaseModel(Base):
             result.append(values_dict["updated_at"])
 
         return result
+
+    def format_value_for_table(self, value: Any) -> Any:
+        if value is None:
+            return ""
+        if isinstance(value, BaseModel):
+            return value.get_description()
+        if isinstance(value, datetime):
+            return value.strftime("%d/%m/%Y %H:%M")
+        if isinstance(value, date):
+            return value.strftime("%d/%m/%Y")
+        if isinstance(value, time):
+            return value.strftime("%H:%M")
+        if isinstance(value, float):
+            return NumberUtils.float_to_str(value)
+        if isinstance(value, bool):
+            return "Sim" if value else "Não"
+        return str(value)
 
     def to_dict(self) -> Dict[str, Any]:
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -145,7 +164,7 @@ class BaseModel(Base):
         )
 
     @classmethod
-    def list_for_combo_box(cls) -> List[T]:
+    def list_for_combo_box(cls, **kwargs: Any) -> List[T]:
         return [record for record in cls.query().order_by(cls.id)]
 
     @classmethod
@@ -174,7 +193,13 @@ class BaseModel(Base):
             return
 
         with self.__existent_or_new_session() as session_:
-            session_.add(self)
+            try:
+                session_.add(self)
+            except Exception as e:
+                session_.rollback()
+                raise e
+            finally:
+                session_.commit()
 
     def delete(self, session: Optional[Session] = None) -> None:
         if session:
@@ -183,7 +208,13 @@ class BaseModel(Base):
             return
 
         with self.__existent_or_new_session() as session_:
-            session_.delete(self)
+            try:
+                session_.delete(self)
+            except Exception as e:
+                session_.rollback()
+                raise e
+            finally:
+                session_.commit()
 
     def update(self, session: Optional[Session] = None, **kwargs) -> None:
         for key, value in kwargs.items():
@@ -196,13 +227,18 @@ class BaseModel(Base):
             return
 
         with self.__existent_or_new_session() as session_:
-            session_.add(self)
+            try:
+                session_.add(self)
+            except Exception as e:
+                session_.rollback()
+                raise e
+            finally:
+                session_.commit()
 
     @contextmanager
     def __existent_or_new_session(self) -> Generator[Session, None, None]:
         if existing_session := object_session(self):
             yield existing_session
-            existing_session.commit()
         else:
             with Database.session_scope() as session:
                 yield session

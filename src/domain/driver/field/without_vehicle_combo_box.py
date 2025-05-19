@@ -5,7 +5,7 @@ from domain.driver.model import Driver
 from domain.vehicle.model import Vehicle
 
 
-class DriversWithoutVehicleComboBox(ComboBox):
+class DriversWithoutVehicleComboBox(ComboBox[Driver]):
     def __init__(self, default_none: bool = True, parent=None):
         super().__init__(parent, model_class=Driver, default_none=default_none)
 

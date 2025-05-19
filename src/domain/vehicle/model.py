@@ -46,13 +46,13 @@ class Vehicle(BaseModel):
     def format_license_plate(self) -> Optional[str]:
         return StringUtils.format_license_plate(self.license_plate)
 
+    def get_driver(self) -> Optional["Driver"]:
+        return self.default_driver
+
     def format_for_table(self) -> List[Any]:
         result = super().format_for_table()
 
         result[0] = self.format_license_plate()
-
-        if self.default_driver:
-            result[3] = self.default_driver.get_description()
 
         return result
 

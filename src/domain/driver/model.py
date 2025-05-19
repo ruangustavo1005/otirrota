@@ -24,7 +24,6 @@ class Driver(BaseModel):
         primaryjoin="and_(Driver.id==Vehicle.default_driver_id, Vehicle.active==True)",
         uselist=False,
         viewonly=True,
-        info={"title": "Veículo Padrão"},
     )
 
     def __init__(
@@ -47,11 +46,6 @@ class Driver(BaseModel):
         result = super().format_for_table()
 
         result[1] = self.format_cpf()
-        result[4] = (
-            self.default_from_vehicle.get_description()
-            if self.default_from_vehicle
-            else ""
-        )
 
         return result
 

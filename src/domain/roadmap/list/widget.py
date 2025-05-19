@@ -3,18 +3,17 @@ from enum import Enum
 from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import QComboBox, QDateEdit, QHBoxLayout, QLabel
 
-from common.gui.field.boolean_combo_box import BooleanComboBox
 from common.gui.widget.base_list_widget import BaseListWidget
-from domain.scheduling.model import Scheduling
+from domain.roadmap.model import Roadmap
 
 
-class SchedulingListWidget(BaseListWidget[Scheduling]):
+class RoadmapListWidget(BaseListWidget[Roadmap]):
     def __init__(
         self,
         parent=None,
     ):
         super().__init__(
-            model_class=Scheduling,
+            model_class=Roadmap,
             width=1500,
             height=900,
             parent=parent,
@@ -29,7 +28,7 @@ class SchedulingListWidget(BaseListWidget[Scheduling]):
         filter_area_layout.addWidget(type_label)
 
         self.type_filter = QComboBox()
-        for filter_type in SchedulingDateTypeFilterEnum:
+        for filter_type in RoadmapDateTypeFilterEnum:
             self.type_filter.addItem(filter_type.value, filter_type.name)
         self.type_filter.currentIndexChanged.connect(self.update_button.click)
         filter_area_layout.addWidget(self.type_filter)
@@ -49,20 +48,8 @@ class SchedulingListWidget(BaseListWidget[Scheduling]):
         self.date_filter.dateChanged.connect(self.update_button.click)
         filter_area_layout.addWidget(self.date_filter)
 
-        roadmap_exists_label = QLabel("Possui Roteiro?")
-        roadmap_exists_label.setAlignment(
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
-        )
-        roadmap_exists_label.setFixedWidth(100)
-        filter_area_layout.addWidget(roadmap_exists_label)
 
-        self.roadmap_exists_filter = BooleanComboBox()
-        self.roadmap_exists_filter.currentIndexChanged.connect(self.update_button.click)
-        self.roadmap_exists_filter.setFixedWidth(100)
-        filter_area_layout.addWidget(self.roadmap_exists_filter)
-
-
-class SchedulingDateTypeFilterEnum(str, Enum):
+class RoadmapDateTypeFilterEnum(str, Enum):
     DAY = "Dia"
     WEEK = "Semana"
     MONTH = "Mês"

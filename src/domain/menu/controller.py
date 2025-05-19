@@ -4,6 +4,7 @@ from domain.location.list.controller import LocationListController
 from domain.menu.widget import MenuWidget
 from domain.patient.list.controller import PatientListController
 from domain.purpose.list.controller import PurposeListController
+from domain.roadmap.list.controller import RoadmapListController
 from domain.scheduling.list.controller import SchedulingListController
 from domain.user.list.controller import UserListController
 from domain.vehicle.list.controller import VehicleListController
@@ -40,6 +41,9 @@ class MenuController(BaseController):
         self._widget.scheduling_menu_item.triggered.connect(
             self.__scheduling_menu_item_triggered
         )
+        self._widget.roadmap_menu_item.triggered.connect(
+            self.__roadmap_menu_item_triggered
+        )
 
     def __purpose_menu_item_triggered(self) -> None:
         self.purpose_list_controller = PurposeListController()
@@ -68,6 +72,10 @@ class MenuController(BaseController):
     def __scheduling_menu_item_triggered(self) -> None:
         self.scheduling_list_controller = SchedulingListController()
         self.scheduling_list_controller.show()
+
+    def __roadmap_menu_item_triggered(self) -> None:
+        self.roadmap_list_controller = RoadmapListController()
+        self.roadmap_list_controller.show()
 
     def show(self) -> None:
         self._widget.logged_user_label.setText(
