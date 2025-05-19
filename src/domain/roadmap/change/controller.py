@@ -50,19 +50,26 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
                 entity.arrival.minute,
             )
         )
-        self._widget.creation_user_field.setText(
-            entity.creation_user.get_combo_box_description()
-        )
 
     def _get_model_updates(self) -> Optional[Roadmap]:
         driver = self._widget.driver_combo_box.get_current_data()
         if not driver:
             self._widget.show_info_pop_up("Atenção", "Selecione um motorista")
             return None
+        if not driver.active:
+            self._widget.show_info_pop_up(
+                "Atenção", "O motorista selecionado não está ativo"
+            )
+            return None
 
         vehicle = self._widget.vehicle_combo_box.get_current_data()
         if not vehicle:
             self._widget.show_info_pop_up("Atenção", "Selecione um veículo")
+            return None
+        if not vehicle.active:
+            self._widget.show_info_pop_up(
+                "Atenção", "O veículo selecionado não está ativo"
+            )
             return None
 
         departure_time = self._widget.departure_time_field.time().toPython()
@@ -74,13 +81,13 @@ class RoadmapChangeController(BaseChangeController[Roadmap]):
             return None
 
         date = self._widget.date_field.date().toPython()
-        return Roadmap(
-            driver_id=driver.id,
-            vehicle_id=vehicle.id,
-            departure=datetime.combine(date, departure_time),
-            arrival=datetime.combine(date, arrival_time),
-            creation_user_id=Settings.get_logged_user().id,
-        )
+        return {
+            "driver_id": driver.id,
+            "vehicle_id": vehicle.id,
+            "departure": datetime.combine(date, departure_time),
+            "arrival": datetime.combine(date, arrival_time),
+            "creation_user_id": Settings.get_logged_user().id,
+        }
 
     def _change(self) -> bool:
         with Database.session_scope() as session:

@@ -104,7 +104,7 @@ class RoadmapViewWidget(BaseViewWidget):
         layout.addRow(QLabel("Saída:"), times_layout)
 
         self.creation_user_field = QLineEdit()
-        self.creation_user_field.setReadOnly(True)
+        self.creation_user_field.setDisabled(True)
         layout.addRow(QLabel("Usuário que criou:"), self.creation_user_field)
 
         return layout

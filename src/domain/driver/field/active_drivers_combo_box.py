@@ -4,7 +4,7 @@ from common.gui.field.combo_box import ComboBox
 from domain.driver.model import Driver
 
 
-class ActiveDriversComboBox(ComboBox):
+class ActiveDriversComboBox(ComboBox[Driver]):
     def __init__(self, default_none: bool = True, parent=None):
         super().__init__(parent, model_class=Driver, default_none=default_none)
 

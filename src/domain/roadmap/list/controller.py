@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, List, Tuple, Type
 
 from dateutil.relativedelta import relativedelta
@@ -90,7 +90,7 @@ class RoadmapListController(BaseListController[Roadmap]):
         super()._on_table_selection_changed(selected, deselected)
         if (
             self._selected_model
-            and self._selected_model.departure.date() < datetime.now().date()
+            and self._selected_model.departure.date() < date.today()
         ):
             self._widget.change_button.setDisabled(True)
             self._widget.remove_button.setDisabled(True)

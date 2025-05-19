@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Any, List, Tuple, Type
 
 from dateutil.relativedelta import relativedelta
+from PySide6.QtCore import QItemSelection
 from sqlalchemy import Select
 
 from common.controller.base_controller import BaseController
@@ -92,3 +93,14 @@ class SchedulingListController(BaseListController[Scheduling]):
     def __view_button_clicked(self) -> None:
         self.view_controller = SchedulingViewController(self._selected_model, self)
         self.view_controller.show()
+
+    def _on_table_selection_changed(
+        self, selected: QItemSelection, deselected: QItemSelection
+    ) -> None:
+        super()._on_table_selection_changed(selected, deselected)
+        if (
+            self._selected_model
+            and self._selected_model.roadmap
+        ):
+            self._widget.change_button.setDisabled(True)
+            self._widget.remove_button.setDisabled(True)

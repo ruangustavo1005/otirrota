@@ -193,7 +193,13 @@ class BaseModel(Base):
             return
 
         with self.__existent_or_new_session() as session_:
-            session_.add(self)
+            try:
+                session_.add(self)
+            except Exception as e:
+                session_.rollback()
+                raise e
+            finally:
+                session_.commit()
 
     def delete(self, session: Optional[Session] = None) -> None:
         if session:
@@ -202,7 +208,13 @@ class BaseModel(Base):
             return
 
         with self.__existent_or_new_session() as session_:
-            session_.delete(self)
+            try:
+                session_.delete(self)
+            except Exception as e:
+                session_.rollback()
+                raise e
+            finally:
+                session_.commit()
 
     def update(self, session: Optional[Session] = None, **kwargs) -> None:
         for key, value in kwargs.items():
@@ -215,13 +227,18 @@ class BaseModel(Base):
             return
 
         with self.__existent_or_new_session() as session_:
-            session_.add(self)
+            try:
+                session_.add(self)
+            except Exception as e:
+                session_.rollback()
+                raise e
+            finally:
+                session_.commit()
 
     @contextmanager
     def __existent_or_new_session(self) -> Generator[Session, None, None]:
         if existing_session := object_session(self):
             yield existing_session
-            existing_session.commit()
         else:
             with Database.session_scope() as session:
                 yield session

@@ -22,16 +22,26 @@ class RoadmapAddController(BaseAddController[Roadmap]):
         if not driver:
             self._widget.show_info_pop_up("Atenção", "Selecione um motorista")
             return None
+        if not driver.active:
+            self._widget.show_info_pop_up(
+                "Atenção", "O motorista selecionado não está ativo"
+            )
+            return None
 
         vehicle = self._widget.vehicle_combo_box.get_current_data()
         if not vehicle:
             self._widget.show_info_pop_up("Atenção", "Selecione um veículo")
             return None
+        if not vehicle.active:
+            self._widget.show_info_pop_up(
+                "Atenção", "O veículo selecionado não está ativo"
+            )
+            return None
 
         date = self._widget.date_field.date().toPython()
-        if date <= datetime.now().date():
+        if date < datetime.now().date():
             self._widget.show_info_pop_up(
-                "Atenção", "A data tem que ser maior que a hoje"
+                "Atenção", "A data não pode ser menor que hoje"
             )
             return None
 
