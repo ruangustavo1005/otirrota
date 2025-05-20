@@ -4,6 +4,7 @@ from common.controller.base_change_controller import BaseChangeController
 from common.controller.base_entity_controller import ModelType
 from common.gui.widget.base_change_widget import BaseChangeWidget
 from common.model.column_types.point import Coordinate
+from domain.config.model import Config
 from domain.location.change.widget import LocationChangeWidget
 from domain.location.model import Location
 
@@ -35,6 +36,12 @@ class LocationChangeController(BaseChangeController[Location]):
         }
 
     def _get_widget_instance(self) -> BaseChangeWidget:
+        config = Config.get_config()
+        if config.departure_coordinates:
+            return LocationChangeWidget(
+                latitude=config.departure_coordinates.latitude,
+                longitude=config.departure_coordinates.longitude,
+            )
         return LocationChangeWidget()
 
     def _get_model_class(self) -> Type[ModelType]:

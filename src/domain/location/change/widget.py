@@ -1,3 +1,4 @@
+from typing import Optional
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
@@ -17,16 +18,20 @@ from domain.location.model import Location
 
 
 class LocationChangeWidget(BaseAddWidget):
-    def __init__(self, parent=None) -> None:
-        self.latitude = -26.96227520245754
-        self.longitude = -49.62312637117852
-
+    def __init__(
+        self,
+        parent=None,
+        latitude: Optional[float] = None,
+        longitude: Optional[float] = None,
+    ) -> None:
         super().__init__(
             model_class=Location,
             width=600,
             height=300,
             parent=parent,
         )
+        self.latitude: Optional[float] = latitude
+        self.longitude: Optional[float] = longitude
 
     def _create_form_fields(self) -> QFormLayout:
         form_layout = QFormLayout()
@@ -118,5 +123,8 @@ class LocationChangeWidget(BaseAddWidget):
         self.longitude = lng
 
     def _open_google_maps(self) -> None:
-        url = f"https://www.google.com/maps?q={self.latitude},{self.longitude}&z=18"
+        if self.latitude and self.longitude:
+            url = f"https://www.google.com/maps?q={self.latitude},{self.longitude}&z=18"
+        else:
+            url = "https://www.google.com/maps"
         QDesktopServices.openUrl(QUrl(url))

@@ -185,7 +185,7 @@ class RoadmapAddWidget(BaseAddWidget):
         scheduling_table_layout.addWidget(self.schedulings_table)
 
         self.remove_scheduling_button = QPushButton("Remover Agendamento Selecionado")
-        self.remove_scheduling_button.setFixedWidth(200)
+        self.remove_scheduling_button.setFixedWidth(230)
         self.remove_scheduling_button.setEnabled(False)
         self.remove_scheduling_button.clicked.connect(self._remove_selected_scheduling)
         remove_scheduling_layout = QHBoxLayout()
