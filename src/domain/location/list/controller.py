@@ -49,5 +49,5 @@ class LocationListController(BaseListController[Location]):
         self.remove_controller.show()
 
     def __open_maps_button_clicked(self) -> None:
-        url = f"https://www.google.com/maps/@{self._selected_model.coordinates.latitude},{self._selected_model.coordinates.longitude},15z"  # noqa: E501
+        url = f"https://www.google.com/maps?q={self._selected_model.coordinates.latitude},{self._selected_model.coordinates.longitude}&z=18"  # noqa: E501
         QDesktopServices.openUrl(QUrl(url))

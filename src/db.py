@@ -49,11 +49,14 @@ class Database:
 
     @classmethod
     @contextmanager
-    def session_scope(cls, autoflush: bool = True) -> Generator[Session, None, None]:
+    def session_scope(
+        cls, autoflush: bool = True, end_with_commit: bool = True
+    ) -> Generator[Session, None, None]:
         session = cls.get_session(autoflush=autoflush)
         try:
             yield session
-            session.commit()
+            if end_with_commit:
+                session.commit()
         except Exception as e:
             session.rollback()
             raise e

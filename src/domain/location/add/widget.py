@@ -118,5 +118,5 @@ class LocationAddWidget(BaseAddWidget):
         self.longitude = lng
 
     def _open_google_maps(self) -> None:
-        url = f"https://www.google.com/maps/@{self.latitude},{self.longitude},15z"
+        url = f"https://www.google.com/maps?q={self.latitude},{self.longitude}&z=18"
         QDesktopServices.openUrl(QUrl(url))

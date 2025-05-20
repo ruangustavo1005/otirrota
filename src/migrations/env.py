@@ -19,6 +19,7 @@ from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
 from domain.user.model import User
 from domain.vehicle.model import Vehicle
+from domain.config.model import Config
 from settings import Settings
 
 config = context.config

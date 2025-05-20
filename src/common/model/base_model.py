@@ -174,7 +174,7 @@ class BaseModel(Base):
         if session:
             return session.query(cls).filter(cls.id == id).first()
 
-        with Database.session_scope() as session:
+        with Database.session_scope(end_with_commit=False) as session:
             return session.query(cls).filter(cls.id == id).first()
 
     @classmethod

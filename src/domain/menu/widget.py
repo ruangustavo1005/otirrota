@@ -19,6 +19,7 @@ class MenuWidget(BaseWidget):
     def __create_menu(self):
         self.menu_bar = QMenuBar()
         self.__create_management_menu()
+        self.__create_config_menu()
         self.base_layout.setMenuBar(self.menu_bar)
 
     def __create_management_menu(self):
@@ -59,6 +60,9 @@ class MenuWidget(BaseWidget):
                 self.roadmap_menu_item,
             ]
         )
+
+    def __create_config_menu(self):
+        self.config_menu = self.menu_bar.addAction("Configurações")
 
     def __create_logged_user_label(self):
         self.logged_user_label = QLabel("")

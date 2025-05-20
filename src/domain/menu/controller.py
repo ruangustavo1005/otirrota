@@ -1,4 +1,6 @@
 from common.controller.base_controller import BaseController
+from domain.config.change.controller import ConfigChangeController
+from domain.config.model import Config
 from domain.driver.list.controller import DriverListController
 from domain.location.list.controller import LocationListController
 from domain.menu.widget import MenuWidget
@@ -44,6 +46,7 @@ class MenuController(BaseController):
         self._widget.roadmap_menu_item.triggered.connect(
             self.__roadmap_menu_item_triggered
         )
+        self._widget.config_menu.triggered.connect(self.__config_menu_item_triggered)
 
     def __purpose_menu_item_triggered(self) -> None:
         self.purpose_list_controller = PurposeListController()
@@ -76,6 +79,10 @@ class MenuController(BaseController):
     def __roadmap_menu_item_triggered(self) -> None:
         self.roadmap_list_controller = RoadmapListController()
         self.roadmap_list_controller.show()
+
+    def __config_menu_item_triggered(self) -> None:
+        self.config_controller = ConfigChangeController(Config.get_config())
+        self.config_controller.show()
 
     def show(self) -> None:
         self._widget.logged_user_label.setText(

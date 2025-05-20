@@ -1,57 +1,104 @@
+from typing import Optional
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
-    QApplication,
     QFormLayout,
-    QHBoxLayout,
+    QGroupBox,
     QLabel,
+    QLayout,
     QLineEdit,
-    QMessageBox,
     QPushButton,
-    QTextBrowser,
+    QSpinBox,
+    QVBoxLayout,
+    QDoubleSpinBox,
+    QHBoxLayout,
     QWidget,
+    QTextBrowser,
+    QApplication,
+    QMessageBox,
 )
 
-from common.gui.widget.base_add_widget import BaseAddWidget
-from domain.location.model import Location
+from common.gui.widget.base_change_widget import BaseChangeWidget
+from domain.config.model import Config
 
 
-class LocationChangeWidget(BaseAddWidget):
-    def __init__(self, parent=None) -> None:
-        self.latitude = -26.96227520245754
-        self.longitude = -49.62312637117852
-
+class ConfigChangeWidget(BaseChangeWidget):
+    def __init__(
+        self,
+        parent=None,
+    ):
         super().__init__(
-            model_class=Location,
+            model_class=Config,
             width=600,
-            height=300,
+            height=550,
             parent=parent,
         )
+        self.latitude: Optional[float] = None
+        self.longitude: Optional[float] = None
 
-    def _create_form_fields(self) -> QFormLayout:
-        form_layout = QFormLayout()
+    def _create_form_fields(self) -> QLayout:
+        layout = QVBoxLayout()
 
-        self.description_field = QLineEdit()
-        form_layout.addRow(QLabel("Descrição:"), self.description_field)
+        layout.addWidget(self._create_report_box())
+        layout.addWidget(self._create_roadmap_box())
+
+        return layout
+
+    def _create_report_box(self):
+        report_table_layout = QFormLayout()
+
+        self.department_name_field = QLineEdit()
+        report_table_layout.addRow(
+            QLabel("Nome da Secretaria Municipal:"), self.department_name_field
+        )
+
+        self.body_name_field = QLineEdit()
+        report_table_layout.addRow(
+            QLabel("Nome do Órgão Municipal:"), self.body_name_field
+        )
+
+        report_box = QGroupBox("Configurações de Relatórios")
+        report_box.setLayout(report_table_layout)
+
+        return report_box
+
+    def _create_roadmap_box(self):
+        roadmap_table_layout = QFormLayout()
+
+        self.eplison_field = QDoubleSpinBox()
+        self.eplison_field.setSingleStep(0.01)
+        self.eplison_field.setDecimals(2)
+        roadmap_table_layout.addRow(QLabel("Epsilon:"), self.eplison_field)
+
+        self.minpts_field = QSpinBox()
+        roadmap_table_layout.addRow(QLabel("Minpts:"), self.minpts_field)
+
+        self.distance_matrix_api_key_field = QLineEdit()
+        roadmap_table_layout.addRow(
+            QLabel("Chave da Distance Matrix API:"),
+            self.distance_matrix_api_key_field,
+        )
 
         coord_container = QWidget()
         coord_layout = QHBoxLayout(coord_container)
         coord_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.coordinates_field = QLineEdit()
-        self.coordinates_field.setPlaceholderText("latitude, longitude")
-        self.coordinates_field.setDisabled(True)
-        coord_layout.addWidget(self.coordinates_field, 1)
+        self.departure_coordinates_field = QLineEdit()
+        self.departure_coordinates_field.setPlaceholderText("latitude, longitude")
+        self.departure_coordinates_field.setDisabled(True)
+        coord_layout.addWidget(self.departure_coordinates_field, 1)
 
         self.paste_button = QPushButton("Colar")
         self.paste_button.clicked.connect(self._paste_coordinates)
         coord_layout.addWidget(self.paste_button)
 
-        form_layout.addRow(QLabel("Coordenadas:"), coord_container)
+        roadmap_table_layout.addRow(
+            QLabel("Coordenadas do Ponto de Saída:"), coord_container
+        )
 
         self.maps_button = QPushButton("Abrir o Google Maps")
         self.maps_button.clicked.connect(self._open_google_maps)
-        form_layout.addRow("", self.maps_button)
+        roadmap_table_layout.addRow("", self.maps_button)
 
         instructions = QTextBrowser()
         instructions.setReadOnly(True)
@@ -75,9 +122,12 @@ class LocationChangeWidget(BaseAddWidget):
         """
         instructions.setHtml(instructions_html)
 
-        form_layout.addRow("Instruções:", instructions)
+        roadmap_table_layout.addRow("Instruções:", instructions)
 
-        return form_layout
+        roadmap_box = QGroupBox("Configurações do Otimizador de Rotas")
+        roadmap_box.setLayout(roadmap_table_layout)
+
+        return roadmap_box
 
     def _paste_coordinates(self) -> None:
         clipboard = QApplication.clipboard()
@@ -85,7 +135,7 @@ class LocationChangeWidget(BaseAddWidget):
 
         if mime_data.hasText():
             text = mime_data.text()
-            self.coordinates_field.setText(text)
+            self.departure_coordinates_field.setText(text)
             self._parse_coordinates(text)
 
     def _parse_coordinates(self, text: str) -> None:
@@ -118,5 +168,8 @@ class LocationChangeWidget(BaseAddWidget):
         self.longitude = lng
 
     def _open_google_maps(self) -> None:
-        url = f"https://www.google.com/maps?q={self.latitude},{self.longitude}&z=18"
+        if self.latitude and self.longitude:
+            url = f"https://www.google.com/maps?q={self.latitude},{self.longitude}&z=18"
+        else:
+            url = "https://www.google.com/maps"
         QDesktopServices.openUrl(QUrl(url))

@@ -17,7 +17,7 @@ class LocationAddController(BaseAddController[Location]):
             self._widget.show_info_pop_up("Atenção", "A descrição é obrigatória")
             return None
 
-        if hasattr(self._widget, "latitude") and hasattr(self._widget, "longitude"):
+        if self._widget.coordinates_field.text():
             coordinates = Coordinate(
                 latitude=self._widget.latitude,
                 longitude=self._widget.longitude,
