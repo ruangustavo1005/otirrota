@@ -1,7 +1,7 @@
 from enum import Enum
 
 from PySide6.QtCore import QDate, Qt
-from PySide6.QtWidgets import QComboBox, QDateEdit, QHBoxLayout, QLabel
+from PySide6.QtWidgets import QComboBox, QDateEdit, QHBoxLayout, QLabel, QPushButton
 
 from common.gui.widget.base_list_widget import BaseListWidget
 from domain.roadmap.model import Roadmap
@@ -47,6 +47,15 @@ class RoadmapListWidget(BaseListWidget[Roadmap]):
         self.date_filter.setDate(QDate.currentDate())
         self.date_filter.dateChanged.connect(self.update_button.click)
         filter_area_layout.addWidget(self.date_filter)
+
+    def _create_actions_area(self) -> QHBoxLayout:
+        layout = super()._create_actions_area()
+
+        self.suggest_roadmaps_button = QPushButton("Sugerir Roteiros")
+        self.suggest_roadmaps_button.setFixedWidth(130)
+        layout.addWidget(self.suggest_roadmaps_button)
+
+        return layout
 
 
 class RoadmapDateTypeFilterEnum(str, Enum):

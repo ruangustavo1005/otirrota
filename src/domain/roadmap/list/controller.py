@@ -13,6 +13,9 @@ from domain.roadmap.change.controller import RoadmapChangeController
 from domain.roadmap.list.widget import RoadmapDateTypeFilterEnum, RoadmapListWidget
 from domain.roadmap.model import Roadmap
 from domain.roadmap.remove.controller import RoadmapRemoveController
+from domain.roadmap.suggest.drivers_vehicles_relation.controller import (
+    DriversVehiclesRelationController,
+)
 from domain.roadmap.view.controller import RoadmapViewController
 
 
@@ -67,6 +70,9 @@ class RoadmapListController(BaseListController[Roadmap]):
         self._widget.change_button.clicked.connect(self.__change_button_clicked)
         self._widget.remove_button.clicked.connect(self.__remove_button_clicked)
         self._widget.view_button.clicked.connect(self.__view_button_clicked)
+        self._widget.suggest_roadmaps_button.clicked.connect(
+            self.__suggest_roadmaps_button_clicked
+        )
 
     def __add_button_clicked(self) -> None:
         self.add_controller = RoadmapAddController(self)
@@ -83,6 +89,12 @@ class RoadmapListController(BaseListController[Roadmap]):
     def __view_button_clicked(self) -> None:
         self.view_controller = RoadmapViewController(self._selected_model, self)
         self.view_controller.show()
+
+    def __suggest_roadmaps_button_clicked(self) -> None:
+        self.drivers_vehicles_relation_controller = DriversVehiclesRelationController(
+            self
+        )
+        self.drivers_vehicles_relation_controller.show()
 
     def _on_table_selection_changed(
         self, selected: QItemSelection, deselected: QItemSelection
