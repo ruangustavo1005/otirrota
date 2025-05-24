@@ -1,5 +1,6 @@
 from typing import Any, Generic, List, Type, TypeVar, Union
 
+from PySide6.QtGui import QKeyEvent, QMouseEvent, QWheelEvent
 from PySide6.QtWidgets import QComboBox
 
 from common.model.base_model import BaseModel
@@ -20,6 +21,7 @@ class ComboBox(QComboBox, Generic[ModelType]):
         **kwargs: Any,
     ):
         self.model_class = model_class
+        self._read_only = False
         super().__init__(parent)
         if load:
             self.fill(default_none, **kwargs)
@@ -48,3 +50,25 @@ class ComboBox(QComboBox, Generic[ModelType]):
     def clear(self) -> None:
         super().clear()
         self._data = []
+
+    def set_read_only(self, read_only: bool) -> None:
+        self._read_only = read_only
+        self.setEditable(not read_only)
+
+    def mousePressEvent(self, event: QMouseEvent) -> None:
+        if self._read_only:
+            event.ignore()
+            return
+        super().mousePressEvent(event)
+
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        if self._read_only:
+            event.ignore()
+            return
+        super().wheelEvent(event)
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        if self._read_only:
+            event.ignore()
+            return
+        super().keyPressEvent(event)

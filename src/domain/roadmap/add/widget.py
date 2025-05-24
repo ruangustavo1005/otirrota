@@ -76,7 +76,7 @@ class RoadmapAddWidget(BaseAddWidget):
         current_date = QDate.currentDate()
         self.date_field.setDate(
             current_date.addDays(
-                3 if current_date.dayOfWeek() == Qt.DayOfWeek.Friday else 1
+                3 if current_date.dayOfWeek() == Qt.DayOfWeek.Friday.value else 1
             )
         )
         self.date_field.setFixedWidth(100)

@@ -1,21 +1,22 @@
 from typing import Optional
+
 from PySide6.QtCore import QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtWidgets import (
+    QApplication,
+    QDoubleSpinBox,
     QFormLayout,
     QGroupBox,
+    QHBoxLayout,
     QLabel,
     QLayout,
     QLineEdit,
+    QMessageBox,
     QPushButton,
     QSpinBox,
-    QVBoxLayout,
-    QDoubleSpinBox,
-    QHBoxLayout,
-    QWidget,
     QTextBrowser,
-    QApplication,
-    QMessageBox,
+    QVBoxLayout,
+    QWidget,
 )
 
 from common.gui.widget.base_change_widget import BaseChangeWidget

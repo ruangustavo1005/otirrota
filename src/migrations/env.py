@@ -11,6 +11,7 @@ from sqlalchemy import engine_from_config, pool
 
 from common.model.base_model import Base
 from domain.companion.model import Companion
+from domain.config.model import Config
 from domain.driver.model import Driver
 from domain.location.model import Location
 from domain.patient.model import Patient
@@ -19,7 +20,6 @@ from domain.roadmap.model import Roadmap
 from domain.scheduling.model import Scheduling
 from domain.user.model import User
 from domain.vehicle.model import Vehicle
-from domain.config.model import Config
 from settings import Settings
 
 config = context.config

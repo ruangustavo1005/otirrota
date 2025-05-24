@@ -29,7 +29,9 @@ class ConfigChangeController(BaseChangeController[Config]):
     def _get_model_updates(self) -> Optional[Dict[str, Any]]:
         department_name = self._widget.department_name_field.text()
         if not department_name:
-            self._widget.show_info_pop_up("Atenção", "O nome da secretaria é obrigatório")
+            self._widget.show_info_pop_up(
+                "Atenção", "O nome da secretaria é obrigatório"
+            )
             return None
 
         body_name = self._widget.body_name_field.text()
@@ -49,7 +51,9 @@ class ConfigChangeController(BaseChangeController[Config]):
 
         distance_matrix_api_key = self._widget.distance_matrix_api_key_field.text()
         if not distance_matrix_api_key:
-            self._widget.show_info_pop_up("Atenção", "A chave da distance matrix api é obrigatório")
+            self._widget.show_info_pop_up(
+                "Atenção", "A chave da distance matrix api é obrigatório"
+            )
             return None
 
         if self._widget.departure_coordinates_field.text():
@@ -58,7 +62,9 @@ class ConfigChangeController(BaseChangeController[Config]):
                 longitude=self._widget.longitude,
             )
         else:
-            self._widget.show_info_pop_up("Atenção", "As coordenadas do ponto de partida são obrigatórias")
+            self._widget.show_info_pop_up(
+                "Atenção", "As coordenadas do ponto de partida são obrigatórias"
+            )
             return None
 
         return {

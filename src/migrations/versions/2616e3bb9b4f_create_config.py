@@ -1,14 +1,14 @@
 """
 Revision: 2616e3bb9b4f - create config (2025-05-20 13:55:55.060083)
 """
+
 from datetime import datetime
 from typing import Sequence, Union
 
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 from common.model.column_types.point import Point
-
 
 revision: str = "2616e3bb9b4f"
 down_revision: Union[str, None] = "a760bceaff05"
