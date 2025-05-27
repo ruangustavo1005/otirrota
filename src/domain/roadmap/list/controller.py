@@ -2,7 +2,7 @@ from datetime import date, datetime
 from typing import Any, List, Tuple, Type
 
 from dateutil.relativedelta import relativedelta
-from PySide6.QtCore import QItemSelection
+from PySide6.QtCore import QDate, QItemSelection
 from sqlalchemy import Select
 
 from common.controller.base_controller import BaseController
@@ -13,8 +13,8 @@ from domain.roadmap.change.controller import RoadmapChangeController
 from domain.roadmap.list.widget import RoadmapDateTypeFilterEnum, RoadmapListWidget
 from domain.roadmap.model import Roadmap
 from domain.roadmap.remove.controller import RoadmapRemoveController
-from domain.roadmap.suggest.drivers_vehicles_relation.controller import (
-    DriversVehiclesRelationController,
+from domain.roadmap.suggest.controller import (
+    SuggestRoadmapsController,
 )
 from domain.roadmap.view.controller import RoadmapViewController
 
@@ -64,6 +64,10 @@ class RoadmapListController(BaseListController[Roadmap]):
             end_date = start_date + relativedelta(years=1)
         return start_date, end_date
 
+    def roadmaps_suggested_for(self, date: QDate):
+        self._widget.date_filter.setDate(date)
+        self.update_table_data()
+
     def _set_widget_connections(self) -> None:
         super()._set_widget_connections()
         self._widget.add_button.clicked.connect(self.__add_button_clicked)
@@ -91,9 +95,7 @@ class RoadmapListController(BaseListController[Roadmap]):
         self.view_controller.show()
 
     def __suggest_roadmaps_button_clicked(self) -> None:
-        self.drivers_vehicles_relation_controller = DriversVehiclesRelationController(
-            self
-        )
+        self.drivers_vehicles_relation_controller = SuggestRoadmapsController(self)
         self.drivers_vehicles_relation_controller.show()
 
     def _on_table_selection_changed(

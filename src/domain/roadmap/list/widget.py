@@ -1,7 +1,14 @@
 from enum import Enum
 
 from PySide6.QtCore import QDate, Qt
-from PySide6.QtWidgets import QComboBox, QDateEdit, QHBoxLayout, QLabel, QPushButton
+from PySide6.QtWidgets import (
+    QComboBox,
+    QDateEdit,
+    QHBoxLayout,
+    QHeaderView,
+    QLabel,
+    QPushButton,
+)
 
 from common.gui.widget.base_list_widget import BaseListWidget
 from domain.roadmap.model import Roadmap
@@ -14,7 +21,7 @@ class RoadmapListWidget(BaseListWidget[Roadmap]):
     ):
         super().__init__(
             model_class=Roadmap,
-            width=1500,
+            width=1200,
             height=900,
             parent=parent,
         )
@@ -56,6 +63,17 @@ class RoadmapListWidget(BaseListWidget[Roadmap]):
         layout.addWidget(self.suggest_roadmaps_button)
 
         return layout
+
+    def _configure_table_columns(self, header: QHeaderView) -> None:
+        super()._configure_table_columns(header)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(2, 90)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(3, 60)
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(4, 60)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(5, 120)
 
 
 class RoadmapDateTypeFilterEnum(str, Enum):

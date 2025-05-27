@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QHBoxLayout, QLabel, QLineEdit
+from PySide6.QtWidgets import QHBoxLayout, QHeaderView, QLabel, QLineEdit
 
 from common.gui.field.boolean_combo_box import BooleanComboBox
 from common.gui.field.cpf_line_edit import CPFLineEdit
@@ -71,3 +71,12 @@ class DriverListWidget(BaseListWidget[Driver]):
         layout = super()._create_actions_area()
         self.view_button.setVisible(False)
         return layout
+
+    def _configure_table_columns(self, header: QHeaderView) -> None:
+        super()._configure_table_columns(header)
+        header.setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(1, 100)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(2, 100)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(3, 70)

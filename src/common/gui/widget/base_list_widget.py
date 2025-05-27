@@ -129,7 +129,13 @@ class BaseListWidget(BaseEntityWidget[ModelType], Generic[ModelType]):
 
     def _configure_table_columns(self, header: QHeaderView) -> None:
         header.setSectionResizeMode(header.ResizeMode.Stretch)
-        header.setStretchLastSection(True)
+        column_count = header.count()
+        created_at_index = column_count - 2
+        updated_at_index = column_count - 1
+        header.setSectionResizeMode(created_at_index, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(created_at_index, 110)
+        header.setSectionResizeMode(updated_at_index, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(updated_at_index, 110)
 
     def _create_pagination_area(self) -> QHBoxLayout:
         layout = QHBoxLayout()

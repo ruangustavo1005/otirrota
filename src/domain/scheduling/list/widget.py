@@ -1,7 +1,7 @@
 from enum import Enum
 
 from PySide6.QtCore import QDate, Qt
-from PySide6.QtWidgets import QComboBox, QDateEdit, QHBoxLayout, QLabel
+from PySide6.QtWidgets import QComboBox, QDateEdit, QHBoxLayout, QHeaderView, QLabel
 
 from common.gui.field.boolean_combo_box import BooleanComboBox
 from common.gui.widget.base_list_widget import BaseListWidget
@@ -60,6 +60,19 @@ class SchedulingListWidget(BaseListWidget[Scheduling]):
         self.roadmap_exists_filter.currentIndexChanged.connect(self.update_button.click)
         self.roadmap_exists_filter.setFixedWidth(100)
         filter_area_layout.addWidget(self.roadmap_exists_filter)
+
+    def _configure_table_columns(self, header: QHeaderView) -> None:
+        super()._configure_table_columns(header)
+        header.setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(0, 110)
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(2, 150)
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(3, 110)
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(5, 110)
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.Fixed)
+        header.resizeSection(6, 100)
 
 
 class SchedulingDateTypeFilterEnum(str, Enum):
