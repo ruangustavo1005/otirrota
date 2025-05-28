@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-size: 16px; text-transform: uppercase; }
+    h1 { text-align: center; font-size: 18px; font-weight: bold; padding-bottom: -20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { border: 1px solid #000; padding-top: 4px; padding-left: 4px; padding-right: 4px; padding-bottom: -2px;}
+    th { text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Autorização para uso de veículo</h1>
+  <table>
+    <tbody>
+      <tr>
+        <td><b>Secretaria:</b> {{ department_name }}</td>
+      </tr>
+      <tr>
+        <td><b>Órgão:</b> {{ body_name }}</td>
+      </tr>
+      <tr>
+        <td style="text-align: justify;">
+          Os senhores {% for passanger in passangers %}{{ passanger.description }}; {% endfor %}
+          estão autorizados a trafegar com o veículo {{ vehicle }},
+          conduzido pelo(a) motorista {{ driver_name }} de registro nº {{ driver_registration_number }},
+          sem prejuízo da fiscalização da Diretoria de Gestão Patrimonial/Gerência de Bens Móveis.
+          Esta autorização somente terá validade se acompanhada do Relatório de Tráfego correspondente.
+        </td>
+      </tr>
+      <tr>
+        <td><b>Período:</b> de {{ departure }} à {{ arrival }}</td>
+      </tr>
+      <tr>
+        <td><b>Emitente:</b> {{ issuer }}</td>
+      </tr>
+      <tr>
+        <td><b>Carimbo e Assinatura:</b><br/><br/><br/><br/></td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>

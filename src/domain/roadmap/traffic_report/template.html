@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-size: 16px; text-transform: uppercase; }
+    h1 { text-align: center; font-size: 18px; font-weight: bold; padding-bottom: -20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { border: 1px solid #000; padding-top: 4px; padding-left: 4px; padding-bottom: -2px;}
+    th { text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>Relatório de Tráfego</h1>
+  <table>
+    <tbody>
+      <tr>
+        <td colspan="5"><b>Veículo:</b> {{ vehicle }}</td>
+        <td colspan="5"><b>Motorista:</b> {{ driver }}</td>
+      </tr>
+      <tr>
+        <td colspan="4"><b>Data:</b> {{ date }}</td>
+        <td colspan="3"><b>Saída:</b> {{ departure }}</td>
+        <td colspan="3"><b>Chegada:</b> {{ arrival }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <h1>Itinerário</h1>
+  {% for scheduling in schedulings %}
+  <table>
+    <tbody>
+      <tr>
+        <td colspan="5"><b>Data e hora:</b> {{ scheduling.datetime }}</td>
+        <td colspan="5"><b>Duração estimada:</b> {{ scheduling.average_duration }}</td>
+      </tr>
+      <tr>
+        <td colspan="6"><b>Localização:</b> {{ scheduling.location }}</td>
+        <td colspan="4"><b>Finalidade:</b> {{ scheduling.purpose }}</td>
+      </tr>
+      {% if scheduling.passengers %}
+      <tr>
+        <th colspan="10">Passageiros</th>
+      </tr>
+      <tr>
+        <th colspan="6">Nome</th>
+        <th colspan="2">CPF</th>
+        <th colspan="2">Telefone</th>
+      </tr>
+      {% for passenger in scheduling.passengers %}
+      <tr>
+        <td colspan="6">{{ passenger.name }}</td>
+        <td colspan="2">{{ passenger.cpf }}</td>
+        <td colspan="2">{{ passenger.phone }}</td>
+      </tr>
+      {% endfor %}
+      {% endif %}
+      <tr>
+        <td colspan="10"><b>Observações:</b> {{ scheduling.description }}</td>
+      </tr>
+    </tbody>
+  </table>
+  {% endfor %}
+  <table style="width: 100%; margin-top: 50px; border: none; border-collapse: collapse;">
+    <tr>
+      <td style="width: 50%; text-align: center; border: none;">
+        _____________________________<br>
+        Condutor
+      </td>
+      <td style="width: 50%; text-align: center; border: none;">
+        _____________________________<br>
+        Gestor
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

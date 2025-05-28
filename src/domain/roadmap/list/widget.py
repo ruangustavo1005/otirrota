@@ -62,7 +62,25 @@ class RoadmapListWidget(BaseListWidget[Roadmap]):
         self.suggest_roadmaps_button.setFixedWidth(130)
         layout.addWidget(self.suggest_roadmaps_button)
 
+        self.traffic_report_button = QPushButton("Relatório de Tráfego")
+        self.traffic_report_button.setFixedWidth(150)
+        layout.addWidget(self.traffic_report_button)
+
+        self.vehicle_use_authorization_report_button = QPushButton("Autorização de Uso de Veículo")
+        self.vehicle_use_authorization_report_button.setFixedWidth(250)
+        layout.addWidget(self.vehicle_use_authorization_report_button)
+
         return layout
+
+    def enable_row_actions(self) -> None:
+        super().enable_row_actions()
+        self.traffic_report_button.setDisabled(False)
+
+
+    def disable_row_actions(self) -> None:
+        super().disable_row_actions()
+        self.traffic_report_button.setDisabled(True)
+        self.vehicle_use_authorization_report_button.setDisabled(True)
 
     def _configure_table_columns(self, header: QHeaderView) -> None:
         super()._configure_table_columns(header)

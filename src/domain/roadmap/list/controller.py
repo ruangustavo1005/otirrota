@@ -16,6 +16,10 @@ from domain.roadmap.remove.controller import RoadmapRemoveController
 from domain.roadmap.suggest.controller import (
     SuggestRoadmapsController,
 )
+from domain.roadmap.traffic_report.controller import TrafficReportController
+from domain.roadmap.vehicle_use_authorization_report.controller import (
+    VehicleUseAuthorizationReportController,
+)
 from domain.roadmap.view.controller import RoadmapViewController
 
 
@@ -77,6 +81,12 @@ class RoadmapListController(BaseListController[Roadmap]):
         self._widget.suggest_roadmaps_button.clicked.connect(
             self.__suggest_roadmaps_button_clicked
         )
+        self._widget.traffic_report_button.clicked.connect(
+            self.__traffic_report_button_clicked
+        )
+        self._widget.vehicle_use_authorization_report_button.clicked.connect(
+            self.__vehicle_use_authorization_report_button_clicked
+        )
 
     def __add_button_clicked(self) -> None:
         self.add_controller = RoadmapAddController(self)
@@ -98,13 +108,29 @@ class RoadmapListController(BaseListController[Roadmap]):
         self.drivers_vehicles_relation_controller = SuggestRoadmapsController(self)
         self.drivers_vehicles_relation_controller.show()
 
+    def __traffic_report_button_clicked(self) -> None:
+        self.traffic_report_controller = TrafficReportController(
+            self._selected_model, self
+        )
+        self.traffic_report_controller.generate_report()
+
+    def __vehicle_use_authorization_report_button_clicked(self) -> None:
+        self.vehicle_use_authorization_report_controller = (
+            VehicleUseAuthorizationReportController(self._selected_model, self)
+        )
+        self.vehicle_use_authorization_report_controller.generate_report()
+
     def _on_table_selection_changed(
         self, selected: QItemSelection, deselected: QItemSelection
     ) -> None:
         super()._on_table_selection_changed(selected, deselected)
-        if (
-            self._selected_model
-            and self._selected_model.departure.date() < date.today()
-        ):
-            self._widget.change_button.setDisabled(True)
-            self._widget.remove_button.setDisabled(True)
+        if self._selected_model and isinstance(self._selected_model, Roadmap):
+            self._widget.change_button.setDisabled(
+                self._selected_model.departure.date() < date.today()
+            )
+            self._widget.remove_button.setDisabled(
+                self._selected_model.departure.date() < date.today()
+            )
+            self._widget.vehicle_use_authorization_report_button.setDisabled(
+                self._selected_model.get_passenger_count() == 0
+            )

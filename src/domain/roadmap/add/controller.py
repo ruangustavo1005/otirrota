@@ -114,9 +114,6 @@ class RoadmapAddController(BaseAddController[Roadmap]):
         self._widget._view_scheduling_button.clicked.connect(
             self._on_view_scheduling_clicked
         )
-        self._widget.calculate_departure_arrival_button.clicked.connect(
-            self._on_calculate_departure_arrival_clicked
-        )
         self._widget.scheduling_combo_box.fill(
             date=self._widget.date_field.date().toPython(),
         )
@@ -127,6 +124,3 @@ class RoadmapAddController(BaseAddController[Roadmap]):
             self._widget.scheduling_combo_box.get_current_data()
         )
         self._scheduling_view_controller.show()
-
-    def _on_calculate_departure_arrival_clicked(self) -> None:
-        pass

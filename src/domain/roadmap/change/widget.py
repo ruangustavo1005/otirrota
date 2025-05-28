@@ -216,6 +216,7 @@ class RoadmapChangeWidget(BaseChangeWidget):
     def _create_second_form_part_layout(self) -> QLayout:
         layout = QFormLayout()
         times_layout = QHBoxLayout()
+        times_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         self.departure_time_field = TimeEdit(step_minutes=15)
         self.departure_time_field.setTimeRange(QTime(0, 0, 0), QTime(23, 59, 0))
@@ -231,9 +232,6 @@ class RoadmapChangeWidget(BaseChangeWidget):
         self.arrival_time_field.setCurrentSection(TimeEdit.MinuteSection)
         self.arrival_time_field.setFixedWidth(50)
         times_layout.addWidget(self.arrival_time_field)
-
-        self.calculate_departure_arrival_button = QPushButton("Sugerir Horários")
-        times_layout.addWidget(self.calculate_departure_arrival_button)
 
         layout.addRow(QLabel("Saída:"), times_layout)
 
