@@ -77,15 +77,15 @@ class TrafficReportController(BaseEntityController[Roadmap]):
                     if scheduling.patient:
                         patient_data = {}
                         patient_data["name"] = scheduling.patient.name
-                        patient_data["cpf"] = scheduling.patient.format_cpf()
-                        patient_data["phone"] = scheduling.patient.format_phone()
+                        patient_data["cpf"] = scheduling.patient.format_cpf() or ""
+                        patient_data["phone"] = scheduling.patient.format_phone() or ""
                         sheduling_data["passengers"].append(patient_data)
                         if scheduling.companions:
                             for companion in scheduling.companions:
                                 companion_data = {}
                                 companion_data["name"] = companion.name
-                                companion_data["cpf"] = companion.format_cpf()
-                                companion_data["phone"] = companion.format_phone()
+                                companion_data["cpf"] = companion.format_cpf() or ""
+                                companion_data["phone"] = companion.format_phone() or ""
                                 sheduling_data["passengers"].append(companion_data)
                     data["schedulings"].append(sheduling_data)
         return data

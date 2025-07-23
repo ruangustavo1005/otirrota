@@ -72,7 +72,7 @@ class VehicleUseAuthorizationReportController(BaseEntityController[Roadmap]):
                         patient_data = {}
                         patient_data["description"] = "%s, inscrito com o CPF %s" % (
                             scheduling.patient.name,
-                            scheduling.patient.format_cpf(),
+                            scheduling.patient.format_cpf() or "",
                         )
                         data["passangers"].append(patient_data)
                         if scheduling.companions:
@@ -81,7 +81,7 @@ class VehicleUseAuthorizationReportController(BaseEntityController[Roadmap]):
                                 companion_data["description"] = companion.name
                                 if companion.cpf:
                                     companion_data["description"] += ", inscrito com o CPF %s" % (
-                                        companion.format_cpf(),
+                                        companion.format_cpf() or "",
                                     )
                                 data["passangers"].append(companion_data)
         return data
