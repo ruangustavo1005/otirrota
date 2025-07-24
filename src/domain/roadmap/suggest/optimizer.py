@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import random
 from typing import Dict, List, Optional, Tuple
 
 from PySide6.QtCore import Signal, QObject
@@ -23,6 +24,43 @@ from domain.vehicle.model import Vehicle
 from factory.client.google_maps import GoogleMapsClientFactory
 
 
+class DatetimeLocker:
+    class Item:
+        id: int
+        start: datetime
+        end: datetime
+
+        def __init__(
+            self, id: int, start: datetime, end: datetime
+        ) -> None:
+            self.id = id
+            self.start = start
+            self.end = end
+
+    def __init__(self) -> None:
+        self.__items: List[self.Item] = []
+
+    def lock(self, id: int, start: datetime, end: datetime) -> None:
+        self.__items.append(self.Item(id=id, start=start, end=end))
+
+    def unlock(self, id: int) -> None:
+        self.__items = [item for item in self.__items if item.id != id]
+
+    def is_locked_for_period(
+        self, id: int, start: datetime, end: datetime
+    ) -> bool:
+        return any(
+            start < item.end and end > item.start
+            for item in self.__items
+            if item.id == id
+        )
+
+    def is_free_for_period(
+        self, id: int, start: datetime, end: datetime
+    ) -> bool:
+        return not self.is_locked_for_period(id, start, end)
+
+
 class RoadmapOptimizer(QObject):
     status_updated = Signal(str)
 
@@ -39,16 +77,19 @@ class RoadmapOptimizer(QObject):
         super().__init__()
         self.__date = date
         self.__vehicles_relation = vehicles_relation
+        random.shuffle(self.__vehicles_relation)
         self.__drivers_relation = drivers_relation
+        random.shuffle(self.__drivers_relation)
         self.__on_call_driver_ids = on_call_driver_ids
+        random.shuffle(self.__on_call_driver_ids)
         self.__departure_coordinates = departure_coordinates
         self.__dbscan_epsilon = dbscan_epsilon
         self.__dbscan_min_samples = dbscan_min_samples
 
         self.__google_maps_client = GoogleMapsClientFactory.create()
         self.__schedulings: List[Scheduling] = []
-        self.__used_vehicles: set = set()
-        self.__driver_schedules: Dict[int, List[Dict]] = {}
+        self.__driver_schedules: Dict[int, List[Dict[str, datetime]]] = {}
+        self.__vehicle_locker = DatetimeLocker()
 
     def __log(self, message: str) -> None:
         self.status_updated.emit(message)
@@ -187,11 +228,12 @@ class RoadmapOptimizer(QObject):
         return all_roadmaps
 
     def __create_single_scheduling_roadmap(self, scheduling: Scheduling) -> Roadmap:
-        vehicle = self.__select_best_available_vehicle(scheduling)
-        if not vehicle:
+        vehicles = self.__get_available_vehicles_for_cluster([scheduling])
+        if len(vehicles) == 0:
             raise ValueError(
                 f"AVISO: Nenhum veículo disponível para agendamento {scheduling.datetime}"
             )
+        vehicle = vehicles[0]
 
         scheduling_idx = self.__schedulings.index(scheduling)
         travel_time_to = self.__travel_times_matrix[0, scheduling_idx + 1]
@@ -208,7 +250,7 @@ class RoadmapOptimizer(QObject):
         )
         arrival_time = return_start + relativedelta(seconds=int(travel_time_from))
 
-        self.__used_vehicles.add(vehicle.id)
+        self.__vehicle_locker.lock(vehicle.id, departure_time, arrival_time)
 
         roadmap = Roadmap(
             driver_id=vehicle.default_driver_id,
@@ -331,7 +373,6 @@ class RoadmapOptimizer(QObject):
                 vehicle = available_vehicles[vehicle_idx]
                 roadmap = self.__create_roadmap_from_route(route_schedulings, vehicle)
                 roadmaps.append(roadmap)
-                self.__used_vehicles.add(vehicle.id)
 
         return roadmaps
 
@@ -340,10 +381,13 @@ class RoadmapOptimizer(QObject):
     ) -> List[Vehicle]:
         max_capacity_needed = max(s.get_passenger_count() for s in schedulings)
 
+        departure_time, arrival_time = self.__calculate_departure_and_arrival(schedulings)
+
         available_vehicles = [
             v
             for v in self.__vehicles_relation
-            if v.capacity >= max_capacity_needed and v.id not in self.__used_vehicles
+            if v.capacity >= max_capacity_needed and
+            self.__vehicle_locker.is_free_for_period(v.id, departure_time, arrival_time)
         ]
 
         def vehicle_priority(vehicle: Vehicle) -> Tuple[int, int]:
@@ -352,31 +396,26 @@ class RoadmapOptimizer(QObject):
 
         return sorted(available_vehicles, key=vehicle_priority, reverse=True)
 
-    def __select_best_available_vehicle(
-        self, scheduling: Scheduling
-    ) -> Optional[Vehicle]:
-        required_capacity = scheduling.get_passenger_count()
-
-        available_vehicles = [
-            v
-            for v in self.__vehicles_relation
-            if v.capacity >= required_capacity and v.id not in self.__used_vehicles
-        ]
-
-        if not available_vehicles:
-            return None
-
-        def vehicle_priority(vehicle: Vehicle) -> Tuple[int, int]:
-            has_default_driver = 1 if vehicle.default_driver_id else 0
-            return (has_default_driver, -vehicle.capacity)
-
-        return sorted(available_vehicles, key=vehicle_priority, reverse=True)[0]
-
     def __create_roadmap_from_route(
         self, schedulings: List[Scheduling], vehicle: Vehicle
     ) -> Roadmap:
         schedulings.sort(key=lambda s: s.datetime)
 
+        departure_time, arrival_time = self.__calculate_departure_and_arrival(schedulings)
+
+        self.__vehicle_locker.lock(vehicle.id, departure_time, arrival_time)
+
+        roadmap = Roadmap(
+            driver_id=vehicle.default_driver_id,
+            vehicle_id=vehicle.id,
+            departure=self.__normalize_datetime(departure_time),
+            arrival=self.__normalize_datetime(arrival_time),
+        )
+        roadmap.schedulings = schedulings
+
+        return roadmap
+
+    def __calculate_departure_and_arrival(self, schedulings):
         first_scheduling = schedulings[0]
         last_scheduling = schedulings[-1]
 
@@ -400,16 +439,7 @@ class RoadmapOptimizer(QObject):
         last_scheduling_idx = self.__schedulings.index(last_scheduling)
         travel_time_from_last = self.__travel_times_matrix[last_scheduling_idx + 1, 0]
         arrival_time = last_end + relativedelta(seconds=int(travel_time_from_last))
-
-        roadmap = Roadmap(
-            driver_id=vehicle.default_driver_id,
-            vehicle_id=vehicle.id,
-            departure=self.__normalize_datetime(departure_time),
-            arrival=self.__normalize_datetime(arrival_time),
-        )
-        roadmap.schedulings = schedulings
-
-        return roadmap
+        return departure_time,arrival_time
 
     def __assign_drivers_to_roadmaps(self, roadmaps: List[Roadmap]) -> List[Roadmap]:
         self.__log("Atribuindo motoristas aos roteiros que não possuem um...")
